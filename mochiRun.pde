@@ -1,6 +1,13 @@
+float sanpoX=1100;
+float moveSpeed=10;
+float foodPlace=175;
+float moveXLimit=1000;
+
+
 void setup(){
   size(1300,700);
   background(85,107,47);
+  rectMode(CENTER);
   frameRate(60);
 }
 
@@ -13,4 +20,6 @@ void draw(){
   line(0,550,1000,550);
 }
 
-//try to change
+class player{
+  float sanpoX,sanpoY;
+}
