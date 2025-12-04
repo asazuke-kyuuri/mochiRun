@@ -1,10 +1,4 @@
-float sanpoX=1100;
-float sanpoY=475;
-float moveSpeed=10;
-float foodPlace=175;
-float moveXLimit=1000;
-
-PShape sanpoShape;
+player sanpo;
 
 void setup(){
   //基本設定
@@ -13,7 +7,8 @@ void setup(){
   frameRate(60);
   rectMode(CENTER);
   
-  
+  //三方作ってみる
+  sanpo=new player();
 }
 
 void draw(){
@@ -30,23 +25,54 @@ void draw(){
   fill(255,140,0);
   ellipse(300,625,30,30);
   
-  //三方の図形グループ
-  sanpoShape=createShape(GROUP);
-  
-  PShape plate=createShape(RECT,1100,sanpoY,200,20);
-  plate.setFill(color(245,222,179));
-  sanpoShape.addChild(plate);
-  
-  PShape stand=createShape(RECT,1100,sanpoY+35,100,50);
-  stand.setFill(color(245,222,179));
-  sanpoShape.addChild(stand);
-  
-  PShape hole=createShape(ELLIPSE,1100,sanpoY+35,25,25);
-  hole.setFill(color(85,107,47));
-  sanpoShape.addChild(hole);
-  shape(sanpoShape,0,0);
+  sanpo.update();
 }
 
-class Player{
+void keyPressed(){
+  if(keyCode==UP){
+    sanpo.up();
+  }
+  else if(keyCode==DOWN){
+    sanpo.down();
+  }
+}
 
+class player{
+  //属性
+  float px;
+  float py;
+  
+  //初期状態の設定
+  player(){
+    px=1100;
+    py=475;
+  }
+  
+  //情報を更新して三方を表示
+  void update(){
+    fill(245,222,179);
+    rect(px,py,200,20);
+  }
+  
+  //いっこあがる
+  void up(){
+    if(py==175){
+      py=625;
+    }
+    else{
+      py-=150;
+    }
+  }
+  
+  //いっこさがる
+  void down(){
+    if(py==625){
+      py=175;
+    }
+    else{
+      py+=150;
+    }
+  }
+  
+  //何かplayerに機能追加するならここから
 }
