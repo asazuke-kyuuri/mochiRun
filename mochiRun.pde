@@ -1,4 +1,5 @@
 player sanpo;
+something orange;
 
 void setup(){
   //基本設定
@@ -7,27 +8,26 @@ void setup(){
   frameRate(60);
   rectMode(CENTER);
   
-  //三方作ってみる
+  //三方，みかん作ってみる
   sanpo=new player();
+  orange=new something();
 }
 
 void draw(){
+  //毎フレーム上書きするものたち
   background(85,107,47);
   stroke(255,248,220);
   line(0,100,1300,100);
   line(0,250,1000,250);
   line(0,400,1000,400);
   line(0,550,1000,550);
-  
-  fill(255,250,240);
-  ellipse(700,175,100,50);
-  ellipse(900,475,80,50);
-  fill(255,140,0);
-  ellipse(300,625,30,30);
+  line(1000,0,1000,700);
   
   sanpo.update();
+  orange.update();
 }
 
+//ボタンが押されたタイミングでのみ動く関数
 void keyPressed(){
   if(keyCode==UP){
     sanpo.up();
@@ -37,6 +37,7 @@ void keyPressed(){
   }
 }
 
+//プレイヤークラス
 class player{
   //属性
   float px;
@@ -44,7 +45,7 @@ class player{
   
   //初期状態の設定
   player(){
-    px=1100;
+    px=1200;
     py=475;
   }
   
@@ -75,4 +76,29 @@ class player{
   }
   
   //何かplayerに機能追加するならここから
+}
+
+//流れてくるものクラス
+class something{
+  float sx;
+  float sy;
+  float sv;
+  
+  something(){
+    sx=100;
+    sy=475;
+    sv=5;
+  }
+  
+  void update(){
+    sx+=sv;
+    fill(255,140,0);
+    ellipse(sx,sy,30,30);
+    if(sx>=1000){
+      sx=0;
+      sy=175+150*int(random(0,4));
+    }
+  }
+  
+  //何かsomethingに機能追加するならここから
 }
