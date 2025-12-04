@@ -1,14 +1,19 @@
 float sanpoX=1100;
+float sanpoY=475;
 float moveSpeed=10;
 float foodPlace=175;
 float moveXLimit=1000;
 
+PShape sanpoShape;
 
 void setup(){
+  //基本設定
   size(1300,700);
   background(85,107,47);
-  rectMode(CENTER);
   frameRate(60);
+  rectMode(CENTER);
+  
+  
 }
 
 void draw(){
@@ -24,7 +29,24 @@ void draw(){
   ellipse(900,475,80,50);
   fill(255,140,0);
   ellipse(300,625,30,30);
-  fill(245,222,179);
-  rect(sanpoX,475,150,20);
-  rect(sanpoX,505,90,40);
+  
+  //三方の図形グループ
+  sanpoShape=createShape(GROUP);
+  
+  PShape plate=createShape(RECT,1100,sanpoY,200,20);
+  plate.setFill(color(245,222,179));
+  sanpoShape.addChild(plate);
+  
+  PShape stand=createShape(RECT,1100,sanpoY+35,100,50);
+  stand.setFill(color(245,222,179));
+  sanpoShape.addChild(stand);
+  
+  PShape hole=createShape(ELLIPSE,1100,sanpoY+35,25,25);
+  hole.setFill(color(85,107,47));
+  sanpoShape.addChild(hole);
+  shape(sanpoShape,0,0);
+}
+
+class Player{
+
 }
