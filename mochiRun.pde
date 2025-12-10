@@ -1,5 +1,7 @@
 player sanpo;
 something orange;
+observer observe;
+boolean hit;
 
 void setup(){
   //基本設定
@@ -7,10 +9,12 @@ void setup(){
   background(85,107,47);
   frameRate(60);
   rectMode(CENTER);
+  imageMode(CENTER);
   
-  //三方，みかん作ってみる
+  //三方，みかん，衝突判定作ってみる
   sanpo=new player();
   orange=new something();
+  observe=new observer(sanpo,orange);
 }
 
 void draw(){
@@ -25,6 +29,7 @@ void draw(){
   
   sanpo.update();
   orange.update();
+  observe.update();
 }
 
 //ボタンが押されたタイミングでのみ動く関数
@@ -51,8 +56,13 @@ class player{
   
   //情報を更新して三方を表示
   void update(){
-    fill(245,222,179);
-    rect(px,py,200,20);
+    if(hit){
+      fill(255,0,0);
+    }
+    else{
+      fill(245,222,179);
+    } 
+    rect(px,py,150,20);
   }
   
   //いっこあがる
@@ -101,4 +111,25 @@ class something{
   }
   
   //何かsomethingに機能追加するならここから
+}
+
+//衝突判定クラス
+class observer{
+  player sanpo;
+  something some;
+  
+  observer(player _sanpo,something _orange){
+    sanpo=_sanpo;
+    some=_orange;
+  }
+  
+  void update(){
+    if(sanpo.py==some.sy&&dist(sanpo.px,sanpo.py,some.sx,some.sy)<=300){
+      hit=true;
+    }
+    else{
+      hit=false;
+    }
+  }
+  
 }
