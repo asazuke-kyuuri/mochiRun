@@ -3,7 +3,9 @@ something someLine1,someLine2,someLine3,someLine4;
 observer obLine1,obLine2,obLine3,obLine4;
 boolean hit,hit1,hit2,hit3,hit4;
 int hitThing;
-PImage sanpoImg,mikanImg,mochiImg;
+static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg;
+int count=0;
+boolean ending;
 
 void setup(){
   //基本設定
@@ -14,14 +16,16 @@ void setup(){
   imageMode(CENTER);
   
   //画像読み込み
-  sanpoImg = loadImage("sanpo.jpg"); 
-  sanpoImg.resize(100, 75);
-  mikanImg = loadImage("mikan.jpg"); 
-  mikanImg.resize(75, 50);
-  mochiImg = loadImage("mochi.jpg");
-  mochiImg.resize(75, 50);
+  sanpoImg = loadImage("sanpo.png"); 
+  sanpoImg.resize(140, 105);
+  mikanImg = loadImage("mikan.png"); 
+  mikanImg.resize(45, 40);
+  mochiImg = loadImage("mochi.png");
+  mochiImg.resize(75, 40);
+  kabiMikanImg = loadImage("kabiMikan.png");
+  kabiMikanImg.resize(45,40);
   
-  //三方，みかん，衝突判定作ってみる
+  //クラスのインスタンス作ってみる
   sanpo=new player();
   someLine1=new something(175);
   someLine2=new something(325);
@@ -53,7 +57,7 @@ void draw(){
   hit3=obLine3.update();
   hit4=obLine4.update();
   
-  hitThing=judge(hit1,hit2,hit3,hit4);
+  judge(hit1,hit2,hit3,hit4);
 }
 
 //ボタンが押されたタイミングでのみ動く関数
@@ -67,29 +71,26 @@ void keyPressed(){
 }
 
 //総合的な衝突判定かつ，どのLineのが当たったのか
-int judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
-  int Line1=someLine1.sc;
-  int Line2=someLine2.sc;
-  int Line3=someLine3.sc;
-  int Line4=someLine4.sc;
+void judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
+  int lineX;
   if(hit1||hit2||hit3||hit4){
     hit=true;
     if(hit1){
-      return Line1;
+      lineX=someLine1.sc;
     }
     else if(hit2){
-      return Line2;
+      lineX=someLine2.sc;
     }
     else if(hit3){
-      return Line3;
+      lineX=someLine3.sc;
     }
     else{
-      return Line4;
+      lineX=someLine4.sc;
     }
+    sanpo.thingsRegulate(lineX);
   }
   else{
     hit=false;
-    return -1;
   }
 }
 
@@ -98,16 +99,36 @@ class player{
   //属性
   float px;
   float py;
+  ArrayList<Integer> catchThings; //ラッパークラスの使用(int<->Integer)
   
   //初期状態の設定
   player(){
-    px=1200;
+    px=1150;
     py=475;
+    catchThings=new ArrayList<Integer>();
   }
   
   //情報を更新して三方を表示
   void update(){
     image(sanpoImg,px,py+25);
+    float nowHeight=py+25+(sanpoImg.height/2);
+    for(int i=0;i<count;i++){
+      int nowThing=catchThings.get(i);
+      switch(nowThing){
+        case 1:
+              nowHeight=nowHeight+(mikanImg.height/2);
+              image(mikanImg,px,nowHeight);
+              nowHeight=nowHeight+(mikanImg.height/2);
+              break;
+        case 2:
+              nowHeight=nowHeight+(mochiImg.height/2);
+              image(mikanImg,px,nowHeight);
+              nowHeight=nowHeight+(mochiImg.height/2);
+              break;
+        default:
+                break;
+      }
+    }
   }
   
   //いっこあがる
@@ -129,6 +150,36 @@ class player{
       py+=150;
     }
   }
+  
+  //ArrayListの管理
+  void thingsRegulate(int choice){
+    switch(choice){
+      case 1:
+            ending=true;
+            if(count>=10){
+              catchThings.remove(count-1);
+              count--;
+            }
+            catchThings.add(count,choice);
+            count++;
+            break;
+      case 3:
+            if(count!=0){
+              catchThings.remove(count-1);
+              count--;
+            }
+            break;
+      default:
+            if(count>=10){
+              catchThings.remove(count-1);
+              count--;
+            }
+            catchThings.add(count,choice);
+            count++;
+            break;
+    }
+  }
+  //
   
   //何かplayerに機能追加するならここから
 }
@@ -160,9 +211,13 @@ class something{
     else if(sc==2){
       image(mochiImg,sx,sy);
     }
+    else if(sc==3){
+      image(kabiMikanImg,sx,sy);
+    }
+    
     if(sx>=1000){
       sx=0;
-      sc=int(random(3));
+      sc=int(random(4));
     }
   }
   
@@ -180,7 +235,7 @@ class observer{
   }
   
   boolean update(){
-    if(sanpo.py==some.sy&&some.sc!=0&&dist(sanpo.px,sanpo.py,some.sx,some.sy)<=300){
+    if(sanpo.py==some.sy&&some.sc!=0&&dist(sanpo.px,sanpo.py,some.sx,some.sy)<=250){
       return true;
     }
     else{
