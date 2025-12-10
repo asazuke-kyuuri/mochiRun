@@ -7,7 +7,8 @@ observer obLine1;
 observer obLine2;
 observer obLine3;
 observer obLine4;
-boolean hit;
+boolean hit,hit1,hit2,hit3,hit4;
+int hitThing;
 
 void setup(){
   //基本設定
@@ -44,12 +45,12 @@ void draw(){
   someLine2.update();
   someLine3.update();
   someLine4.update();
-  obLine1.update();
-  obLine2.update();
-  obLine3.update();
-  obLine4.update();
+  hit1=obLine1.update();
+  hit2=obLine2.update();
+  hit3=obLine3.update();
+  hit4=obLine4.update();
   
-  hit =obLine1.update()||obLine2.update()||obLine3.update()||obLine4.update();
+  hitThing=judge(hit1,hit2,hit3,hit4);
 }
 
 //ボタンが押されたタイミングでのみ動く関数
@@ -59,6 +60,33 @@ void keyPressed(){
   }
   else if(keyCode==DOWN){
     sanpo.down();
+  }
+}
+
+//総合的な衝突判定かつ，どのLineのが当たったのか
+int judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
+  int Line1=someLine1.sc;
+  int Line2=someLine2.sc;
+  int Line3=someLine3.sc;
+  int Line4=someLine4.sc;
+  if(hit1||hit2||hit3||hit4){
+    hit=true;
+    if(hit1){
+      return Line1;
+    }
+    else if(hit2){
+      return Line2;
+    }
+    else if(hit3){
+      return Line3;
+    }
+    else{
+      return Line4;
+    }
+  }
+  else{
+    hit=false;
+    return -1;
   }
 }
 
