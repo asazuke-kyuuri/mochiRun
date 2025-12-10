@@ -1,6 +1,12 @@
 player sanpo;
-something orange;
-observer observe;
+something someLine1;
+something someLine2;
+something someLine3;
+something someLine4;
+observer obLine1;
+observer obLine2;
+observer obLine3;
+observer obLine4;
 boolean hit;
 
 void setup(){
@@ -13,8 +19,14 @@ void setup(){
   
   //三方，みかん，衝突判定作ってみる
   sanpo=new player();
-  orange=new something();
-  observe=new observer(sanpo,orange);
+  someLine1=new something(175);
+  someLine2=new something(325);
+  someLine3=new something(475);
+  someLine4=new something(625);
+  obLine1=new observer(sanpo,someLine1);
+  obLine2=new observer(sanpo,someLine2);
+  obLine3=new observer(sanpo,someLine3);
+  obLine4=new observer(sanpo,someLine4);
 }
 
 void draw(){
@@ -28,8 +40,16 @@ void draw(){
   line(1000,0,1000,700);
   
   sanpo.update();
-  orange.update();
-  observe.update();
+  someLine1.update();
+  someLine2.update();
+  someLine3.update();
+  someLine4.update();
+  obLine1.update();
+  obLine2.update();
+  obLine3.update();
+  obLine4.update();
+  
+  hit =obLine1.update()||obLine2.update()||obLine3.update()||obLine4.update();
 }
 
 //ボタンが押されたタイミングでのみ動く関数
@@ -93,20 +113,32 @@ class something{
   float sx;
   float sy;
   float sv;
+  int sc; //s-choice
   
-  something(){
+  something(float iny){
     sx=100;
-    sy=475;
+    sy=iny;
     sv=5;
+    sc=2;
   }
   
   void update(){
     sx+=sv;
-    fill(255,140,0);
+    if(sc==0){
+      noFill();
+      noStroke();
+    }
+    else if(sc==1){
+      fill(255,140,0);
+    }
+    else if(sc==2){
+      fill(255,255,240);
+      stroke(0,0,0);
+    }
     ellipse(sx,sy,30,30);
     if(sx>=1000){
       sx=0;
-      sy=175+150*int(random(0,4));
+      sc=int(random(3));
     }
   }
   
@@ -118,17 +150,17 @@ class observer{
   player sanpo;
   something some;
   
-  observer(player _sanpo,something _orange){
+  observer(player _sanpo,something _some){
     sanpo=_sanpo;
-    some=_orange;
+    some=_some;
   }
   
-  void update(){
-    if(sanpo.py==some.sy&&dist(sanpo.px,sanpo.py,some.sx,some.sy)<=300){
-      hit=true;
+  boolean update(){
+    if(sanpo.py==some.sy&&some.sc!=0&&dist(sanpo.px,sanpo.py,some.sx,some.sy)<=300){
+      return true;
     }
     else{
-      hit=false;
+      return false;
     }
   }
   
