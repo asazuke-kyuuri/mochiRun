@@ -1,14 +1,9 @@
 player sanpo;
-something someLine1;
-something someLine2;
-something someLine3;
-something someLine4;
-observer obLine1;
-observer obLine2;
-observer obLine3;
-observer obLine4;
+something someLine1,someLine2,someLine3,someLine4;
+observer obLine1,obLine2,obLine3,obLine4;
 boolean hit,hit1,hit2,hit3,hit4;
 int hitThing;
+PImage sanpoImg,mikanImg,mochiImg;
 
 void setup(){
   //基本設定
@@ -17,6 +12,14 @@ void setup(){
   frameRate(60);
   rectMode(CENTER);
   imageMode(CENTER);
+  
+  //画像読み込み
+  sanpoImg = loadImage("sanpo.jpg"); 
+  sanpoImg.resize(100, 75);
+  mikanImg = loadImage("mikan.jpg"); 
+  mikanImg.resize(75, 50);
+  mochiImg = loadImage("mochi.jpg");
+  mochiImg.resize(75, 50);
   
   //三方，みかん，衝突判定作ってみる
   sanpo=new player();
@@ -104,13 +107,7 @@ class player{
   
   //情報を更新して三方を表示
   void update(){
-    if(hit){
-      fill(255,0,0);
-    }
-    else{
-      fill(245,222,179);
-    } 
-    rect(px,py,150,20);
+    image(sanpoImg,px,py+25);
   }
   
   //いっこあがる
@@ -155,15 +152,14 @@ class something{
     if(sc==0){
       noFill();
       noStroke();
+      ellipse(sx,sy,1,1);
     }
     else if(sc==1){
-      fill(255,140,0);
+      image(mikanImg,sx,sy);
     }
     else if(sc==2){
-      fill(255,255,240);
-      stroke(0,0,0);
+      image(mochiImg,sx,sy);
     }
-    ellipse(sx,sy,30,30);
     if(sx>=1000){
       sx=0;
       sc=int(random(3));
