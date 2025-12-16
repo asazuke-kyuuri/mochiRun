@@ -111,19 +111,19 @@ class player{
   //情報を更新して三方を表示
   void update(){
     image(sanpoImg,px,py+25);
-    float nowHeight=py+25+(sanpoImg.height/2);
+    float nowHeight=py+25-(sanpoImg.height/2)+10; //+10は調整
     for(int i=0;i<count;i++){
       int nowThing=catchThings.get(i);
       switch(nowThing){
         case 1:
-              nowHeight=nowHeight+(mikanImg.height/2);
+              nowHeight=nowHeight-(mikanImg.height/2);
               image(mikanImg,px,nowHeight);
-              nowHeight=nowHeight+(mikanImg.height/2);
+              nowHeight=nowHeight-(mikanImg.height/2);
               break;
         case 2:
-              nowHeight=nowHeight+(mochiImg.height/2);
-              image(mikanImg,px,nowHeight);
-              nowHeight=nowHeight+(mochiImg.height/2);
+              nowHeight=nowHeight-(mochiImg.height/2);
+              image(mochiImg,px,nowHeight);
+              nowHeight=nowHeight-(mochiImg.height/2);
               break;
         default:
                 break;
