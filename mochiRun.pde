@@ -72,26 +72,30 @@ void keyPressed(){
 
 //総合的な衝突判定かつ，どのLineのが当たったのか
 void judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
-  int lineX;
+  something currentThing=null;
   if(hit1||hit2||hit3||hit4){
     hit=true;
+    
     if(hit1){
-      lineX=someLine1.sc;
+      currentThing=someLine1;
     }
     else if(hit2){
-      lineX=someLine2.sc;
+      currentThing=someLine2;
     }
     else if(hit3){
-      lineX=someLine3.sc;
+      currentThing=someLine3;
     }
-    else{
-      lineX=someLine4.sc;
+    else if(hit4){
+      currentThing=someLine4;
     }
-    sanpo.thingsRegulate(lineX);
+    
+    sanpo.thingsRegulate(currentThing.sc);
+    currentThing.sc=0;
   }
   else{
     hit=false;
   }
+  
 }
 
 //プレイヤークラス
