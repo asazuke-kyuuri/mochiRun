@@ -22,7 +22,7 @@ PFont myFont;
 void setup(){
   //基本設定
   size(1300,700);
-  background(85,107,47);
+  background(#6e7955);
   frameRate(60);
   rectMode(CENTER);
   imageMode(CENTER);
@@ -69,7 +69,7 @@ void setup(){
   //ボタン定義する
   buttonX = width/2;
   buttonY = height/2+200;
-  ruleBtnX = 150;
+  ruleBtnX = 100;
   ruleBtnY = 50;
   backBtnX = width/2;
   backBtnY = height/2+300;
@@ -98,30 +98,30 @@ void common(){
 
 //スタート画面
 void startScene(){
-  fill(0);
-  textSize(50);
-  text("MOTHI RUN", width/2, height/2); 
+  fill(#1f3134);
+  textSize(250);
+  text("もちばしり", width/2, height/2); 
 
   //スタートボタン
-  fill(50, 200, 50); 
+  fill(#95859c); 
   rect(buttonX, buttonY, buttonW, buttonH, 10); 
 
-  fill(255); 
+  fill(#e7e7eb); 
   textSize(32);
-  String buttonText = "START";
+  String buttonText = "はじまり";
   text(buttonText,buttonX, buttonY);
   
   //ルールボタン
-  fill(200, 200, 200);
+  fill(#705b67);
   rect(ruleBtnX, ruleBtnY, ruleBtnW, ruleBtnH, 10);
-  fill(0);
+  fill(#e7e7eb);
   textSize(24);
-  text("ルール", ruleBtnX, ruleBtnY);
+  text("きまりごと", ruleBtnX, ruleBtnY);
 }
 
 //ゲーム画面
 void gameScene(){
-  stroke(255,248,220);
+  stroke(#dcd3b2);
   line(0,100,1300,100);
   line(0,250,1000,250);
   line(0,400,1000,400);
@@ -152,63 +152,76 @@ void gameScene(){
 void resultScene(player sanpo){
   fill(0);
   textSize(50);
-  text("CLEAR!!!!!!!!!!", width/2, height/2 - 200); // 終了メッセージ
+  text("完走!!!!!!!!!!", width/2, height/2 - 200); // 終了メッセージ
   
   textSize(30); 
   fill(50);
-  text("[Click to return to Title]", width/2, height/2 + 60);
+  text("[押すとはじめにもどる]", width/2, height/2 + 200);
   
-  String NameStart="あなたのかがみもちは...";
+  String NameStart="そなたのかがみもちは...";
   text(NameStart,width/2-200, height/2 - 100);
   String fullName="かがみ";
+  int fullScore=0;
   for(int i=0;i<count;i++){
     int id=sanpo.catchThings.get(i);
     String itemName="";
+    int score=0;
     
     switch(id){
       case 1:  
             itemName = "みかん";
+            score=3;
             break;
       case 2:  
             itemName = "もち";
+            score=2;
             break;
       case 4:  
-            itemName = "ベーコン";
+            itemName = "べぇこん";
+            score=4;
             break;
       case 5:  
             itemName = "たまご";
+            score=3;
             break;
       case 6:  
-            itemName = "バーガー";
+            itemName = "ばぁがぁ";
+            score=4;
             break;
       case 7:  
-            itemName = "レタス";
+            itemName = "れたす";
+            score=3;
             break;
       case 8:  
-            itemName = "トマト";
+            itemName = "とまと";
+            score=3;
             break;
       case 9:  
-            itemName = "オムレツ";
+            itemName = "おむれつ";
+            score=4;
             break;
       case 10: 
-            itemName = "マカロン";
+            itemName = "まかろん";
+            score=4;
             break;
       default:
             break;
     }
     fullName+=" "+itemName;
+    fullScore+=score;
   }
   fullName+=" もち";
   textSize(35);
-  fill(#f09199);
+  fill(#e2041b);
   text(fullName,width/2,height/2,1700,40);
+  text("得点："+fullScore+"点",width/2,height/2+100);
 }
 
 //ルール画面
 void ruleScene(){
   fill(0);
   textSize(40);
-  text("- ルール -", width/2, 150);
+  text("きまりごと", width/2, 150);
   
   textSize(30);
   text("自分だけの鏡餅を作ろう！\n道に落ちているアイテム", width/2, height/2);
