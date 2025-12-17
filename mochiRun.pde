@@ -5,13 +5,13 @@ observer obLine1,obLine2,obLine3,obLine4;
 boolean hit,hit1,hit2,hit3,hit4;
 int hitThing;
 
-static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg;
+static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg;
 int count=0;
 boolean ending;
 
 String scene="start";
 int startTime;
-final int gameFinish=5000;//120000;
+final int gameFinish=10000;//120000;
 
 int buttonX,buttonY,buttonW = 200,buttonH = 70; 
 
@@ -44,6 +44,10 @@ void setup(){
   lettuceImg.resize(75, 40);
   tomatoImg = loadImage("tomato.png");
   tomatoImg.resize(75, 40);
+  omuImg = loadImage("omu.png");
+  omuImg.resize(75, 40);
+  macaronImg = loadImage("macaron.png"); 
+  macaronImg.resize(45, 40);
   
   //クラスのインスタンス作ってみる
   sanpo=new player();
@@ -135,20 +139,37 @@ void resultScene(){
   text("[Click to return to Title]", width/2, height/2 + 60);
 }
 
+//newGameリセット
+void newGame() {
+  someLine1.sx = 0;
+  someLine1.sc = 5;
+  someLine2.sx = 0;
+  someLine2.sc = 5;
+  someLine3.sx = 0;
+  someLine3.sc = 2;
+  someLine4.sx = 0;
+  someLine4.sc = 9;
+}
+
 //開始などのボタンが押されたときに動く関数
 void mousePressed(){
   if(scene == "start"){
     //スタートボタンの範囲判定
     if (abs(mouseX-buttonX)<=30&&abs(mouseY-buttonY)<=30) {
-      
       scene = "game"; 
+      
+      //リセットする
+      count = 0;
+      sanpo.catchThings.clear();
+      ending = false;
+      newGame();
       startTime = millis(); //ゲーム開始時にタイマーをリセット
     }
   }
   else if(scene == "game"){
     // ゲーム中はクリックしても何も起こらない
   }
-  else if(scene == "clear"){
+  else if(scene == "result"){
     // リザルトからタイトルへ戻る
     scene = "start";
   }
@@ -212,6 +233,13 @@ class player{
     float nowHeight=py+25-(sanpoImg.height/2)+10; //+10は調整
     for(int i=0;i<count;i++){
       int nowThing=catchThings.get(i);
+      int beforeThing;
+      if(i!=0){
+        beforeThing=catchThings.get(i-1);
+      }
+      else{
+        beforeThing=1;
+      }
       switch(nowThing){
         case 1:
               nowHeight=nowHeight-(mikanImg.height/2);
@@ -220,6 +248,9 @@ class player{
               break;
         case 2:
               nowHeight=nowHeight-(mochiImg.height/2);
+              if(beforeThing==2){
+                nowHeight=nowHeight+15;
+              }
               image(mochiImg,px,nowHeight);
               nowHeight=nowHeight-(mochiImg.height/2);
               break;
@@ -234,7 +265,7 @@ class player{
               nowHeight=nowHeight-(eggImg.height/2);
               break;
         case 6:
-              nowHeight=nowHeight-(hamburgerImg.height/2);
+              nowHeight=nowHeight-(hamburgerImg.height/2)+10;
               image(hamburgerImg,px,nowHeight);
               nowHeight=nowHeight-(hamburgerImg.height/2);
               break;
@@ -247,6 +278,16 @@ class player{
               nowHeight=nowHeight-(tomatoImg.height/2);
               image(tomatoImg,px,nowHeight);
               nowHeight=nowHeight-(tomatoImg.height/2);
+              break;
+        case 9:
+              nowHeight=nowHeight-(omuImg.height/2)+10;
+              image(omuImg,px,nowHeight);
+              nowHeight=nowHeight-(omuImg.height/2);
+              break;
+        case 10:
+              nowHeight=nowHeight-(macaronImg.height/2);
+              image(macaronImg,px,nowHeight);
+              nowHeight=nowHeight-(macaronImg.height/2);
               break;
         default:
                 break;
@@ -317,7 +358,7 @@ class something{
   something(float iny){
     sx=100;
     sy=iny;
-    sv=7;
+    sv=int(random(5,10));
     sc=2;
   }
   
@@ -352,11 +393,19 @@ class something{
     else if(sc==8){
       image(tomatoImg,sx,sy);
     }
-    
+    else if(sc==9){
+      image(omuImg,sx,sy);
+    }
+    else if(sc==9){
+      image(omuImg,sx,sy);
+    }
+    else if(sc==10){
+      image(macaronImg,sx,sy);
+    }
     if(sx>=1000){
       sx=0;
       sv=int(random(5,10));
-      sc=int(random(9));
+      sc=int(random(11));
     }
   }
   
