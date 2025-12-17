@@ -5,13 +5,13 @@ observer obLine1,obLine2,obLine3,obLine4;
 boolean hit,hit1,hit2,hit3,hit4;
 int hitThing;
 
-static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg;
+static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg;
 int count=0;
 boolean ending;
 
 String scene="start";
 int startTime;
-final int gameFinish=10000;//120000;
+final int gameFinish=5000;//120000;
 
 int buttonX,buttonY,buttonW = 200,buttonH = 70; 
 
@@ -34,6 +34,16 @@ void setup(){
   mochiImg.resize(75, 40);
   kabiMikanImg = loadImage("kabiMikan.png");
   kabiMikanImg.resize(45,40);
+  baconImg = loadImage("bacon.png");
+  baconImg.resize(75, 20);
+  eggImg = loadImage("egg.png");
+  eggImg.resize(75, 30);
+  hamburgerImg = loadImage("hamburger.png");
+  hamburgerImg.resize(75, 40);
+  lettuceImg = loadImage("lettuce.png");
+  lettuceImg.resize(75, 40);
+  tomatoImg = loadImage("tomato.png");
+  tomatoImg.resize(75, 40);
   
   //クラスのインスタンス作ってみる
   sanpo=new player();
@@ -47,8 +57,8 @@ void setup(){
   obLine4=new observer(sanpo,someLine4);
   
   //ボタン定義する
-  buttonX = width/2 - buttonW/2;
-  buttonY = height/2 + 100 - buttonH/2;
+  buttonX = width/2;
+  buttonY = height/2+200;
 }
 
 void draw(){
@@ -82,7 +92,7 @@ void startScene(){
   fill(255); 
   textSize(32);
   String buttonText = "START";
-  text(buttonText, buttonX + buttonW/2, buttonY + buttonH/2);
+  text(buttonText,buttonX, buttonY);
 }
 
 //ゲーム画面
@@ -129,8 +139,7 @@ void resultScene(){
 void mousePressed(){
   if(scene == "start"){
     //スタートボタンの範囲判定
-    if (mouseX >= buttonX && mouseX <= buttonX + buttonW &&
-        mouseY >= buttonY && mouseY <= buttonY + buttonH) {
+    if (abs(mouseX-buttonX)<=30&&abs(mouseY-buttonY)<=30) {
       
       scene = "game"; 
       startTime = millis(); //ゲーム開始時にタイマーをリセット
@@ -213,6 +222,31 @@ class player{
               nowHeight=nowHeight-(mochiImg.height/2);
               image(mochiImg,px,nowHeight);
               nowHeight=nowHeight-(mochiImg.height/2);
+              break;
+        case 4:
+              nowHeight=nowHeight-(baconImg.height/2);
+              image(baconImg,px,nowHeight);
+              nowHeight=nowHeight-(baconImg.height/2);
+              break;
+        case 5:
+              nowHeight=nowHeight-(eggImg.height/2);
+              image(eggImg,px,nowHeight);
+              nowHeight=nowHeight-(eggImg.height/2);
+              break;
+        case 6:
+              nowHeight=nowHeight-(hamburgerImg.height/2);
+              image(hamburgerImg,px,nowHeight);
+              nowHeight=nowHeight-(hamburgerImg.height/2);
+              break;
+        case 7:
+              nowHeight=nowHeight-(lettuceImg.height/2);
+              image(lettuceImg,px,nowHeight);
+              nowHeight=nowHeight-(lettuceImg.height/2);
+              break;
+        case 8:
+              nowHeight=nowHeight-(tomatoImg.height/2);
+              image(tomatoImg,px,nowHeight);
+              nowHeight=nowHeight-(tomatoImg.height/2);
               break;
         default:
                 break;
@@ -303,11 +337,26 @@ class something{
     else if(sc==3){
       image(kabiMikanImg,sx,sy);
     }
+    else if(sc==4){
+      image(baconImg,sx,sy);
+    }
+    else if(sc==5){
+      image(eggImg,sx,sy);
+    }
+    else if(sc==6){
+      image(hamburgerImg,sx,sy);
+    }
+    else if(sc==7){
+      image(lettuceImg,sx,sy);
+    }
+    else if(sc==8){
+      image(tomatoImg,sx,sy);
+    }
     
     if(sx>=1000){
       sx=0;
       sv=int(random(5,10));
-      sc=int(random(4));
+      sc=int(random(9));
     }
   }
   
