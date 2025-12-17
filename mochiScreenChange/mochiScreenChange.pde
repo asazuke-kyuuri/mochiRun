@@ -1,31 +1,68 @@
 String scene = "start";
 
-// === シーン遷移用 タイマー変数 ===
-int startTime; // ゲーム開始時のmillis()の値を保存
-final int GAME_DURATION = 5000; // 10秒 (10000ミリ秒)
+//日本語にいる
+PFont myFont;
 
-// === ボタンの定義のための変数 ===
-int buttonX;
-int buttonY;
+// === シーン遷移用 タイマー変数 ===
+int startTime; 
+final int GAME_DURATION = 10000; 
+
+// === 中央のスタートボタン ===
+int buttonX, buttonY;
 int buttonW = 200; 
 int buttonH = 70;  
+
+// === 左上のボタン（ルール） ===
+int leftBtnX, leftBtnY;
+int leftBtnW = 150;
+int leftBtnH = 60;
+
+// === 右上のボタン（設定） ===
+int rightBtnX, rightBtnY;
+int rightBtnW = 150;
+int rightBtnH = 60;
+
+// === ★追加：戻るボタン（各画面共通） ===
+int backBtnX, backBtnY;
+int backBtnW = 200;
+int backBtnH = 60;
 
 void setup(){
   size(1300, 700);
   textSize(50);
-  textAlign(CENTER, CENTER); // テキストを中央揃えに設定
+  textAlign(CENTER, CENTER);
+  
+ //日本語にいる
+  myFont = createFont("MS Gothic", 50, true); 
+  textFont(myFont); 
 
-  // ボタンの位置を画面中央に設定
+  textAlign(CENTER, CENTER);
+
+  // 中央ボタンの位置
   buttonX = width/2 - buttonW/2;
   buttonY = height/2 + 100 - buttonH/2;
+
+  // 左上ボタンの位置
+  leftBtnX = 50;
+  leftBtnY = 50;
+
+  // 右上ボタンの位置
+  rightBtnX = width - rightBtnW - 50;
+  rightBtnY = 50;
+  
+  // ★戻るボタンの位置（画面の下の方）
+  backBtnX = width/2 - backBtnW/2;
+  backBtnY = height - 100;
 }
 
 void draw(){
   common();
-  // シーンの切り替え
+  // シーンによって表示する関数を変える
   if(scene == "start") start_scene();
   else if(scene == "game") game_scene();
   else if(scene == "clear") clear_scene();
+  else if(scene == "rule") rule_scene(); 
+  else if(scene == "setting") setting_scene(); 
 }
 
 void common(){
@@ -37,68 +74,129 @@ void common(){
 void start_scene(){
   fill(0);
   textSize(50);
-  text("MOTHI RUN", width/2, height/2); 
+  text("MOCHI RUN", width/2, height/2); 
 
-  // --- Draw Start Button ---
+  // --- 1. 中央のスタートボタン ---
   fill(50, 200, 50); 
   rect(buttonX, buttonY, buttonW, buttonH, 10); 
-
   fill(255); 
   textSize(32);
-  String buttonText = "START";
-  text(buttonText, buttonX + buttonW/2, buttonY + buttonH/2);
+  text("START", buttonX + buttonW/2, buttonY + buttonH/2);
+
+  // --- 2. 左上のボタン（RULE） ---
+  fill(200, 200, 200);
+  rect(leftBtnX, leftBtnY, leftBtnW, leftBtnH, 10);
+  fill(0);
+  textSize(24);
+  text("ルール", leftBtnX + leftBtnW/2, leftBtnY + leftBtnH/2);
+
+  // --- 3. 右上のボタン（SETTING） ---
+  fill(192, 192, 192);
+  rect(rightBtnX, rightBtnY, rightBtnW, rightBtnH, 10);
+  fill(0);
+  textSize(24);
+  text("設定", rightBtnX + rightBtnW/2, rightBtnY + rightBtnH/2);
 }
 
-// === game_scene: 10秒経過判定のみ ===
-void game_scene(){
+// ルール画面 
+void rule_scene(){
+  fill(0);
+  textSize(40);
+  text("- ルール -", width/2, 150);
   
-  // 画面表示はシンプルに
+  textSize(30);
+  text("自分だけの鏡餅を作ろう！\n道に落ちているアイテム", width/2, height/2);
+  
+  // 戻るボタンの描画
+  fill(100);
+  rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
+  fill(255);
+  textSize(24);
+  text("戻る", backBtnX + backBtnW/2, backBtnY + backBtnH/2);
+}
+
+// 設定画面
+void setting_scene(){
+  fill(0);
+  textSize(40);
+  text("- 設定 -", width/2, 150);
+  
+  textSize(30);
+  text("", width/2, height/2 - 30);
+  text("", width/2, height/2 + 30);
+  
+  // 戻るボタン
+  fill(100);
+  rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
+  fill(255);
+  textSize(24);
+  text("戻る", backBtnX + backBtnW/2, backBtnY + backBtnH/2);
+}
+
+void game_scene(){
   fill(0);
   textSize(50);
-  text("Game", width/2, height/2);
-  
-  // ----------------------------------------------------
-  // 10秒経過判定ロジック
-  // ----------------------------------------------------
+  text("ゲーム中", width/2, height/2);
   
   int elapsedTime = millis() - startTime; 
-  
-  // if関数を使って10秒たったらtrue（終了）、たってなかったらfalse（続行）
   boolean time_up = (elapsedTime >= GAME_DURATION); 
   
   if (time_up) {
-    // 終了（true）: リザルト画面へ
     scene = "clear";
   } 
-  // else (false の場合は何もしない、つまり次のフレームも game_scene が実行される)
 }
 
 void clear_scene(){
   fill(0);
   textSize(50);
-  text("CLEAR!!!!!!!!!!", width/2, height/2 - 30); // 終了メッセージ
+  text("クリア!!!", width/2, height/2 - 30);
   
   textSize(30); 
   fill(50);
-  text("[Click to return to Title]", width/2, height/2 + 60);
+  text("[クリックしてタイトルへ]", width/2, height/2 + 60);
 }
 
-
 void mousePressed(){
+  // === スタート画面でのクリック ===
   if(scene == "start"){
-    // スタートボタンの範囲判定
+    // スタートボタン
     if (mouseX >= buttonX && mouseX <= buttonX + buttonW &&
         mouseY >= buttonY && mouseY <= buttonY + buttonH) {
-      
       scene = "game"; 
-      startTime = millis(); // ★ゲーム開始時にタイマーをリセット
+      startTime = millis(); 
+    }
+    // ルール画面へ
+    if (mouseX >= leftBtnX && mouseX <= leftBtnX + leftBtnW &&
+        mouseY >= leftBtnY && mouseY <= leftBtnY + leftBtnH) {
+      scene = "rule"; 
+    }
+    // 設定画面へ
+    if (mouseX >= rightBtnX && mouseX <= rightBtnX + rightBtnW &&
+        mouseY >= rightBtnY && mouseY <= rightBtnY + rightBtnH) {
+      scene = "setting";
     }
   }
+  
+  // ルール画面
+  else if(scene == "rule"){
+    if (mouseX >= backBtnX && mouseX <= backBtnX + backBtnW &&
+        mouseY >= backBtnY && mouseY <= backBtnY + backBtnH) {
+      scene = "start"; // タイトルに戻る
+    }
+  }
+  
+  // 設定画面
+  else if(scene == "setting"){
+    if (mouseX >= backBtnX && mouseX <= backBtnX + backBtnW &&
+        mouseY >= backBtnY && mouseY <= backBtnY + backBtnH) {
+      scene = "start"; // タイトルに戻る
+    }
+  }
+  
   else if(scene == "game"){
-    // ゲーム中はクリックしても何も起こらない
+    // ゲーム中のクリック（なし）
   }
   else if(scene == "clear"){
-    // リザルトからタイトルへ戻る
     scene = "start";
   }
 }

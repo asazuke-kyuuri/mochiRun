@@ -4,10 +4,10 @@ observer obLine1,obLine2,obLine3,obLine4;
 
 boolean hit,hit1,hit2,hit3,hit4;
 int hitThing;
-
+boolean ending=true;
+int count=0,countLmt=20;
 static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg;
-int count=0;
-boolean ending;
+
 
 String scene="start";
 int startTime;
@@ -18,6 +18,7 @@ int ruleBtnX, ruleBtnY,ruleBtnW = 150,ruleBtnH = 70;
 int backBtnX, backBtnY,backBtnW = 150,backBtnH = 70;
 
 PFont myFont;
+
 
 void setup(){
   //基本設定
@@ -55,7 +56,7 @@ void setup(){
   macaronImg = loadImage("macaron.png"); 
   macaronImg.resize(45, 40);
   
-  //クラスのインスタンス作ってみる
+  //クラスのインスタンス作成
   sanpo=new player();
   someLine1=new something(175);
   someLine2=new something(325);
@@ -66,7 +67,7 @@ void setup(){
   obLine3=new observer(sanpo,someLine3);
   obLine4=new observer(sanpo,someLine4);
   
-  //ボタン定義する
+  //ボタン定義
   buttonX = width/2;
   buttonY = height/2+200;
   ruleBtnX = 100;
@@ -74,6 +75,7 @@ void setup(){
   backBtnX = width/2;
   backBtnY = height/2+300;
 }
+
 
 void draw(){
   common();
@@ -91,13 +93,16 @@ void draw(){
   }
 }
 
-//毎フレーム必ずdrawされる
+
+/*毎フレーム実行*/
 void common(){
   background(85,107,47);
 }
 
-//スタート画面
+
+/*スタート画面*/
 void startScene(){
+  //タイトル
   fill(#1f3134);
   textSize(250);
   text("もちばしり", width/2, height/2); 
@@ -105,7 +110,6 @@ void startScene(){
   //スタートボタン
   fill(#95859c); 
   rect(buttonX, buttonY, buttonW, buttonH, 10); 
-
   fill(#e7e7eb); 
   textSize(32);
   String buttonText = "はじまり";
@@ -119,110 +123,15 @@ void startScene(){
   text("きまりごと", ruleBtnX, ruleBtnY);
 }
 
-//ゲーム画面
-void gameScene(){
-  stroke(#dcd3b2);
-  line(0,100,1300,100);
-  line(0,250,1000,250);
-  line(0,400,1000,400);
-  line(0,550,1000,550);
-  line(1000,0,1000,700);
-  
-  sanpo.update();
-  someLine1.update();
-  someLine2.update();
-  someLine3.update();
-  someLine4.update();
-  hit1=obLine1.update();
-  hit2=obLine2.update();
-  hit3=obLine3.update();
-  hit4=obLine4.update();
-  
-  judge(hit1,hit2,hit3,hit4);
-  
-  //経過時間の判定
-  int nowTime=millis()-startTime;
-  boolean timeUp=(nowTime>=gameFinish);
-  if(timeUp){
-    scene="result";
-  }
-}
 
-//リザルト画面
-void resultScene(player sanpo){
-  fill(0);
-  textSize(50);
-  text("完走!!!!!!!!!!", width/2, height/2 - 200); // 終了メッセージ
-  
-  textSize(30); 
-  fill(50);
-  text("[押すとはじめにもどる]", width/2, height/2 + 200);
-  
-  String NameStart="そなたのかがみもちは...";
-  text(NameStart,width/2-200, height/2 - 100);
-  String fullName="かがみ";
-  int fullScore=0;
-  for(int i=0;i<count;i++){
-    int id=sanpo.catchThings.get(i);
-    String itemName="";
-    int score=0;
-    
-    switch(id){
-      case 1:  
-            itemName = "みかん";
-            score=3;
-            break;
-      case 2:  
-            itemName = "もち";
-            score=2;
-            break;
-      case 4:  
-            itemName = "べぇこん";
-            score=4;
-            break;
-      case 5:  
-            itemName = "たまご";
-            score=3;
-            break;
-      case 6:  
-            itemName = "ばぁがぁ";
-            score=4;
-            break;
-      case 7:  
-            itemName = "れたす";
-            score=3;
-            break;
-      case 8:  
-            itemName = "とまと";
-            score=3;
-            break;
-      case 9:  
-            itemName = "おむれつ";
-            score=4;
-            break;
-      case 10: 
-            itemName = "まかろん";
-            score=4;
-            break;
-      default:
-            break;
-    }
-    fullName+=" "+itemName;
-    fullScore+=score;
-  }
-  fullName+=" もち";
-  textSize(35);
-  fill(#e2041b);
-  text(fullName,width/2,height/2,1700,40);
-  text("得点："+fullScore+"点",width/2,height/2+100);
-}
-
-//ルール画面
+/*ルール画面*/
 void ruleScene(){
+  //タイトル
   fill(0);
   textSize(40);
   text("きまりごと", width/2, 150);
   
+  //説明
   textSize(30);
   text("自分だけの鏡餅を作ろう！\n道に落ちているアイテム", width/2, height/2);
   
@@ -234,38 +143,182 @@ void ruleScene(){
   text("戻る", backBtnX, backBtnY);
 }
 
-//newGameリセット
-void newGame() {
+
+/*ゲーム画面*/
+void gameScene(){
+  //レーンの生成
+  stroke(#dcd3b2);
+  line(0,100,1300,100);
+  line(0,250,1000,250);
+  line(0,400,1000,400);
+  line(0,550,1000,550);
+  line(1000,0,1000,700);
+  
+  //各インスタンス更新
+  sanpo.update();
+  someLine1.update();
+  someLine2.update();
+  someLine3.update();
+  someLine4.update();
+  hit1=obLine1.update();
+  hit2=obLine2.update();
+  hit3=obLine3.update();
+  hit4=obLine4.update();
+  
+  //当たり判定の実行
+  judge(hit1,hit2,hit3,hit4);
+  
+  //経過時間の表示
+  int nowTime=millis()-startTime;
+  int timer=gameFinish/1000-millis()/1000;
+  textSize(35);
+  String timerTxt=(timer/60)+":";
+  if((2+timer-timer/60*60)<10){
+    timerTxt+="0";
+  }
+  text(timerTxt+(2+timer-timer/60*60),1150,50);
+  
+  //経過時間の判定
+  if((2+timer-timer/60*60)<2&&ending){
+    ending=false;
+    ending();
+  }
+  boolean timeUp=(nowTime>=gameFinish);
+  if(timeUp){
+    scene="result";
+  }
+}
+
+
+/*終了前強制ミカン*/
+void ending(){
   someLine1.sx = 0;
-  someLine1.sc = 5;
+  someLine1.sc = 1;
+  someLine1.sv=15;
   someLine2.sx = 0;
-  someLine2.sc = 5;
+  someLine2.sc = 1;
+  someLine2.sv=15;
+  someLine3.sx = 0;
+  someLine3.sc = 1;
+  someLine3.sv=15;
+  someLine4.sx = 0;
+  someLine4.sc = 1;
+  someLine4.sv=15;
+}
+
+/*リザルト画面*/
+void resultScene(player sanpo){
+  //終了メッセージ
+  fill(0);
+  textSize(50);
+  text("完走!!!!!!!!!!", width/2, height/2 - 200);
+  textSize(30); 
+  fill(50);
+  text("[押すとはじめにもどる]", width/2, height/2 + 200);
+  
+  //かがみもちresult
+  String NameStart="そなたのかがみもちは...";
+  text(NameStart,width/2-200, height/2 - 100);
+  String fullName="";
+  int fullScore=0;
+  //特殊かがみもち
+  if(count==3&&sanpo.catchThings.get(0)==2&&sanpo.catchThings.get(1)==2&&sanpo.catchThings.get(2)==1){
+    fullName="かがみもち";
+    fullScore=100000;
+  }
+  //一般かがみもち
+  else{
+    fullName+="かがみ";
+    for(int i=0;i<count;i++){
+      int id=sanpo.catchThings.get(i);
+      String itemName="";
+      int score=0;
+      switch(id){
+        case 1:  
+              itemName = "みかん";
+              score=3;
+              break;
+        case 2:  
+              itemName = "もち";
+              score=2;
+              break;
+        case 4:  
+              itemName = "べぇこん";
+              score=4;
+              break;
+        case 5:  
+              itemName = "たまご";
+              score=3;
+              break;
+        case 6:  
+              itemName = "ばぁがぁ";
+              score=4;
+              break;
+        case 7:  
+              itemName = "れたす";
+              score=3;
+              break;
+        case 8:  
+              itemName = "とまと";
+              score=3;
+              break;
+        case 9:  
+              itemName = "おむれつ";
+              score=4;
+              break;
+        case 10: 
+              itemName = "まかろん";
+              score=4;
+              break;
+        default:
+              break;
+       }
+      fullName+=" "+itemName;
+      fullScore+=score;
+    }
+    fullName+=" もち";
+  }
+  //結果の表示
+  textSize(35);
+  fill(#e2041b);
+  text(fullName,width/2,height/2,1000,40);
+  text("得点："+fullScore+"点",width/2,height/2+100);
+}
+
+
+/*newGame時リセット*/
+void reset() {
+  ending=true;
+  someLine1.sx = 0;
+  someLine1.sc = 2;
+  someLine2.sx = 0;
+  someLine2.sc = 2;
   someLine3.sx = 0;
   someLine3.sc = 2;
   someLine4.sx = 0;
-  someLine4.sc = 9;
+  someLine4.sc = 2;
 }
 
-//開始などのボタンが押されたときに動く関数
+
+/*開始などのボタンが押されたときに動く関数*/
 void mousePressed(){
   if(scene == "start"){
     //スタートボタンの範囲判定
-    if (abs(mouseX-buttonX)<=30&&abs(mouseY-buttonY)<=30) {
+    if (abs(mouseX-buttonX)<=50&&abs(mouseY-buttonY)<=50) {
       scene = "game"; 
       
       //リセットする
       count = 0;
       sanpo.catchThings.clear();
-      ending = false;
-      newGame();
-      startTime = millis(); //ゲーム開始時にタイマーをリセット
+      reset();
+      startTime = millis();
     }
-    if (abs(mouseX-ruleBtnX)<=30&&abs(mouseY-ruleBtnY)<=30) {
+    if (abs(mouseX-ruleBtnX)<=50&&abs(mouseY-ruleBtnY)<=50) {
       scene = "rule"; 
     }
   }
   else if(scene=="rule"){
-    if(abs(mouseX-backBtnX)<=30&&abs(mouseY-backBtnY)<=30){
+    if(abs(mouseX-backBtnX)<=50&&abs(mouseY-backBtnY)<=50){
       scene="start";
     }
   }
@@ -422,8 +475,7 @@ class player{
   void thingsRegulate(int choice){
     switch(choice){
       case 1:
-            ending=true;
-            if(count>=10){
+            if(count>=countLmt){
               catchThings.remove(count-1);
               count--;
             }
@@ -437,7 +489,7 @@ class player{
             }
             break;
       default:
-            if(count>=10){
+            if(count>=countLmt){
               catchThings.remove(count-1);
               count--;
             }
@@ -446,9 +498,6 @@ class player{
             break;
     }
   }
-  //
-  
-  //何かplayerに機能追加するならここから
 }
 
 //流れてくるものクラス
@@ -472,14 +521,16 @@ class something{
       noStroke();
       ellipse(sx,sy,1,1);
     }
-    else if(sc==1){
+    else if(sc==1||sc==13||sc==14){
+      sc=1;
       image(mikanImg,sx,sy);
     }
     else if(sc==2||sc==11||sc==12){
       sc=2;
       image(mochiImg,sx,sy);
     }
-    else if(sc==3){
+    else if(sc==3||sc==15||sc==16){
+      sc=3;
       image(kabiMikanImg,sx,sy);
     }
     else if(sc==4){
@@ -506,11 +557,9 @@ class something{
     if(sx>=1000){
       sx=0;
       sv=int(random(5,10));
-      sc=int(random(13));
+      sc=int(random(17));
     }
   }
-  
-  //何かsomethingに機能追加するならここから
 }
 
 //衝突判定クラス
@@ -531,5 +580,4 @@ class observer{
       return false;
     }
   }
-  
 }
