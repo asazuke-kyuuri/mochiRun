@@ -14,6 +14,10 @@ int startTime;
 final int gameFinish=10000;//120000;
 
 int buttonX,buttonY,buttonW = 200,buttonH = 70; 
+int ruleBtnX, ruleBtnY,ruleBtnW = 150,ruleBtnH = 70;
+int backBtnX, backBtnY,backBtnW = 150,backBtnH = 70;
+
+PFont myFont;
 
 void setup(){
   //基本設定
@@ -24,6 +28,8 @@ void setup(){
   imageMode(CENTER);
   textSize(50);
   textAlign(CENTER, CENTER);
+  myFont = createFont("MS Gothic", 50, true); 
+  textFont(myFont);
   
   //画像読み込み
   sanpoImg = loadImage("sanpo.png"); 
@@ -63,6 +69,10 @@ void setup(){
   //ボタン定義する
   buttonX = width/2;
   buttonY = height/2+200;
+  ruleBtnX = 150;
+  ruleBtnY = 50;
+  backBtnX = width/2;
+  backBtnY = height/2+300;
 }
 
 void draw(){
@@ -74,7 +84,10 @@ void draw(){
     gameScene();
   }
   else if(scene=="result"){
-    resultScene();
+    resultScene(sanpo);
+  }
+  else if(scene=="rule"){
+    ruleScene();
   }
 }
 
@@ -89,7 +102,7 @@ void startScene(){
   textSize(50);
   text("MOTHI RUN", width/2, height/2); 
 
-  // --- Draw Start Button ---
+  //スタートボタン
   fill(50, 200, 50); 
   rect(buttonX, buttonY, buttonW, buttonH, 10); 
 
@@ -97,6 +110,13 @@ void startScene(){
   textSize(32);
   String buttonText = "START";
   text(buttonText,buttonX, buttonY);
+  
+  //ルールボタン
+  fill(200, 200, 200);
+  rect(ruleBtnX, ruleBtnY, ruleBtnW, ruleBtnH, 10);
+  fill(0);
+  textSize(24);
+  text("ルール", ruleBtnX, ruleBtnY);
 }
 
 //ゲーム画面
@@ -129,14 +149,76 @@ void gameScene(){
 }
 
 //リザルト画面
-void resultScene(){
+void resultScene(player sanpo){
   fill(0);
   textSize(50);
-  text("CLEAR!!!!!!!!!!", width/2, height/2 - 30); // 終了メッセージ
+  text("CLEAR!!!!!!!!!!", width/2, height/2 - 200); // 終了メッセージ
   
   textSize(30); 
   fill(50);
   text("[Click to return to Title]", width/2, height/2 + 60);
+  
+  String NameStart="あなたのかがみもちは...";
+  text(NameStart,width/2-200, height/2 - 100);
+  String fullName="かがみ";
+  for(int i=0;i<count;i++){
+    int id=sanpo.catchThings.get(i);
+    String itemName="";
+    
+    switch(id){
+      case 1:  
+            itemName = "みかん";
+            break;
+      case 2:  
+            itemName = "もち";
+            break;
+      case 4:  
+            itemName = "ベーコン";
+            break;
+      case 5:  
+            itemName = "たまご";
+            break;
+      case 6:  
+            itemName = "バーガー";
+            break;
+      case 7:  
+            itemName = "レタス";
+            break;
+      case 8:  
+            itemName = "トマト";
+            break;
+      case 9:  
+            itemName = "オムレツ";
+            break;
+      case 10: 
+            itemName = "マカロン";
+            break;
+      default:
+            break;
+    }
+    fullName+=" "+itemName;
+  }
+  fullName+=" もち";
+  textSize(35);
+  fill(#f09199);
+  text(fullName,width/2,height/2,1700,40);
+}
+
+//ルール画面
+void ruleScene(){
+  fill(0);
+  textSize(40);
+  text("- ルール -", width/2, 150);
+  
+  textSize(30);
+  text("自分だけの鏡餅を作ろう！\n道に落ちているアイテム", width/2, height/2);
+  
+  // 戻るボタンの描画
+  fill(100);
+  rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
+  fill(255);
+  textSize(24);
+  text("戻る", backBtnX, backBtnY);
 }
 
 //newGameリセット
@@ -164,6 +246,14 @@ void mousePressed(){
       ending = false;
       newGame();
       startTime = millis(); //ゲーム開始時にタイマーをリセット
+    }
+    if (abs(mouseX-ruleBtnX)<=30&&abs(mouseY-ruleBtnY)<=30) {
+      scene = "rule"; 
+    }
+  }
+  else if(scene=="rule"){
+    if(abs(mouseX-backBtnX)<=30&&abs(mouseY-backBtnY)<=30){
+      scene="start";
     }
   }
   else if(scene == "game"){
@@ -372,7 +462,8 @@ class something{
     else if(sc==1){
       image(mikanImg,sx,sy);
     }
-    else if(sc==2){
+    else if(sc==2||sc==11||sc==12){
+      sc=2;
       image(mochiImg,sx,sy);
     }
     else if(sc==3){
@@ -396,16 +487,13 @@ class something{
     else if(sc==9){
       image(omuImg,sx,sy);
     }
-    else if(sc==9){
-      image(omuImg,sx,sy);
-    }
     else if(sc==10){
       image(macaronImg,sx,sy);
     }
     if(sx>=1000){
       sx=0;
       sv=int(random(5,10));
-      sc=int(random(11));
+      sc=int(random(13));
     }
   }
   

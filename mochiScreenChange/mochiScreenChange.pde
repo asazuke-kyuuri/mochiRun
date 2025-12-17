@@ -2,7 +2,7 @@ String scene = "start";
 
 // === シーン遷移用 タイマー変数 ===
 int startTime; // ゲーム開始時のmillis()の値を保存
-final int GAME_DURATION = 10000; // 10秒 (10000ミリ秒)
+final int GAME_DURATION = 5000; // 10秒 (10000ミリ秒)
 
 // === ボタンの定義のための変数 ===
 int buttonX;
