@@ -89,7 +89,7 @@ void judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
       currentThing=someLine4;
     }
     
-    sanpo.thingsRegulate(currentThing.sc);
+    sanpo.thingsRegulate(currentThing.sc); //警告無視でいい
     currentThing.sc=0;
   }
   else{
