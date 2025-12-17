@@ -206,6 +206,7 @@ void ending(){
   someLine4.sv=15;
 }
 
+
 /*リザルト画面*/
 void resultScene(player sanpo){
   //終了メッセージ
@@ -302,6 +303,7 @@ void reset() {
 
 /*開始などのボタンが押されたときに動く関数*/
 void mousePressed(){
+  //スタート画面
   if(scene == "start"){
     //スタートボタンの範囲判定
     if (abs(mouseX-buttonX)<=50&&abs(mouseY-buttonY)<=50) {
@@ -313,25 +315,33 @@ void mousePressed(){
       reset();
       startTime = millis();
     }
+    
+    //ルール説明ボタンの範囲判定
     if (abs(mouseX-ruleBtnX)<=50&&abs(mouseY-ruleBtnY)<=50) {
       scene = "rule"; 
     }
   }
+  
+  //ルール表示画面
   else if(scene=="rule"){
     if(abs(mouseX-backBtnX)<=50&&abs(mouseY-backBtnY)<=50){
       scene="start";
     }
   }
+  
+  //ゲーム画面中
   else if(scene == "game"){
     // ゲーム中はクリックしても何も起こらない
   }
+  
+  //リザルト画面
   else if(scene == "result"){
     // リザルトからタイトルへ戻る
     scene = "start";
   }
 }
 
-//矢印ボタンが押されたタイミングでのみ動く関数
+/*矢印ボタンが押されたタイミングでのみ動くsanpo移動関数*/
 void keyPressed(){
   if(keyCode==UP){
     sanpo.up();
@@ -341,8 +351,9 @@ void keyPressed(){
   }
 }
 
-//総合的な衝突判定かつ，どのLineのが当たったのか
+/*総合的な衝突判定かつ，どのLineのが当たったのか*/
 void judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
+  //当たり判定->どのラインで当たったかのインスタンス保存
   something currentThing=null;
   if(hit1||hit2||hit3||hit4){
     hit=true;
@@ -360,7 +371,9 @@ void judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
       currentThing=someLine4;
     }
     
+    //sanpoの現在のリストと照らし合わせ
     sanpo.thingsRegulate(currentThing.sc); //警告無視でいい
+    //衝突したものは非表示に
     currentThing.sc=0;
   }
   else{
@@ -369,7 +382,8 @@ void judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
   
 }
 
-//プレイヤークラス
+
+/*プレイヤークラス*/
 class player{
   //属性
   float px;
