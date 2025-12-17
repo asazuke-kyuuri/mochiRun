@@ -1,11 +1,19 @@
 player sanpo;
 something someLine1,someLine2,someLine3,someLine4;
 observer obLine1,obLine2,obLine3,obLine4;
+
 boolean hit,hit1,hit2,hit3,hit4;
 int hitThing;
+
 static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg;
 int count=0;
 boolean ending;
+
+String scene="start";
+int startTime;
+final int gameFinish=10000;//120000;
+
+int buttonX,buttonY,buttonW = 200,buttonH = 70; 
 
 void setup(){
   //基本設定
@@ -14,6 +22,8 @@ void setup(){
   frameRate(60);
   rectMode(CENTER);
   imageMode(CENTER);
+  textSize(50);
+  textAlign(CENTER, CENTER);
   
   //画像読み込み
   sanpoImg = loadImage("sanpo.png"); 
@@ -35,11 +45,48 @@ void setup(){
   obLine2=new observer(sanpo,someLine2);
   obLine3=new observer(sanpo,someLine3);
   obLine4=new observer(sanpo,someLine4);
+  
+  //ボタン定義する
+  buttonX = width/2 - buttonW/2;
+  buttonY = height/2 + 100 - buttonH/2;
 }
 
 void draw(){
-  //毎フレーム上書きするものたち
+  common();
+  if(scene=="start"){
+    startScene();
+  }
+  else if(scene=="game"){
+    gameScene();
+  }
+  else if(scene=="result"){
+    resultScene();
+  }
+}
+
+//毎フレーム必ずdrawされる
+void common(){
   background(85,107,47);
+}
+
+//スタート画面
+void startScene(){
+  fill(0);
+  textSize(50);
+  text("MOTHI RUN", width/2, height/2); 
+
+  // --- Draw Start Button ---
+  fill(50, 200, 50); 
+  rect(buttonX, buttonY, buttonW, buttonH, 10); 
+
+  fill(255); 
+  textSize(32);
+  String buttonText = "START";
+  text(buttonText, buttonX + buttonW/2, buttonY + buttonH/2);
+}
+
+//ゲーム画面
+void gameScene(){
   stroke(255,248,220);
   line(0,100,1300,100);
   line(0,250,1000,250);
@@ -58,9 +105,47 @@ void draw(){
   hit4=obLine4.update();
   
   judge(hit1,hit2,hit3,hit4);
+  
+  //経過時間の判定
+  int nowTime=millis()-startTime;
+  boolean timeUp=(nowTime>=gameFinish);
+  if(timeUp){
+    scene="result";
+  }
 }
 
-//ボタンが押されたタイミングでのみ動く関数
+//リザルト画面
+void resultScene(){
+  fill(0);
+  textSize(50);
+  text("CLEAR!!!!!!!!!!", width/2, height/2 - 30); // 終了メッセージ
+  
+  textSize(30); 
+  fill(50);
+  text("[Click to return to Title]", width/2, height/2 + 60);
+}
+
+//開始などのボタンが押されたときに動く関数
+void mousePressed(){
+  if(scene == "start"){
+    //スタートボタンの範囲判定
+    if (mouseX >= buttonX && mouseX <= buttonX + buttonW &&
+        mouseY >= buttonY && mouseY <= buttonY + buttonH) {
+      
+      scene = "game"; 
+      startTime = millis(); //ゲーム開始時にタイマーをリセット
+    }
+  }
+  else if(scene == "game"){
+    // ゲーム中はクリックしても何も起こらない
+  }
+  else if(scene == "clear"){
+    // リザルトからタイトルへ戻る
+    scene = "start";
+  }
+}
+
+//矢印ボタンが押されたタイミングでのみ動く関数
 void keyPressed(){
   if(keyCode==UP){
     sanpo.up();
@@ -198,7 +283,7 @@ class something{
   something(float iny){
     sx=100;
     sy=iny;
-    sv=5;
+    sv=7;
     sc=2;
   }
   
@@ -221,6 +306,7 @@ class something{
     
     if(sx>=1000){
       sx=0;
+      sv=int(random(5,10));
       sc=int(random(4));
     }
   }
