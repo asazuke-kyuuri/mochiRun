@@ -397,12 +397,13 @@ class player{
     catchThings=new ArrayList<Integer>();
   }
   
-  //情報を更新して三方を表示
+  /*情報を更新して三方を表示*/
   void update(){
     image(sanpoImg,px,py+25);
     float nowHeight=py+25-(sanpoImg.height/2)+10; //+10は調整
     for(int i=0;i<count;i++){
       int nowThing=catchThings.get(i);
+      //もち重ね用の変数
       int beforeThing;
       if(i!=0){
         beforeThing=catchThings.get(i-1);
@@ -410,6 +411,7 @@ class player{
       else{
         beforeThing=1;
       }
+      //積み重ねアクション
       switch(nowThing){
         case 1:
               nowHeight=nowHeight-(mikanImg.height/2);
@@ -465,7 +467,7 @@ class player{
     }
   }
   
-  //いっこあがる
+  /*いっこあがる*/
   void up(){
     if(py==175){
       py=625;
@@ -475,7 +477,7 @@ class player{
     }
   }
   
-  //いっこさがる
+  /*いっこさがる*/
   void down(){
     if(py==625){
       py=175;
@@ -485,7 +487,7 @@ class player{
     }
   }
   
-  //ArrayListの管理
+  /*ArrayListの管理*/
   void thingsRegulate(int choice){
     switch(choice){
       case 1:
@@ -514,7 +516,8 @@ class player{
   }
 }
 
-//流れてくるものクラス
+
+/*流れてくるものクラス*/
 class something{
   float sx;
   float sy;
@@ -528,6 +531,7 @@ class something{
     sc=2;
   }
   
+  /*情報を更新して三方を表示*/
   void update(){
     sx+=sv;
     if(sc==0){
@@ -568,6 +572,7 @@ class something{
     else if(sc==10){
       image(macaronImg,sx,sy);
     }
+    //もしラインを超えていたら初めに戻す
     if(sx>=1000){
       sx=0;
       sv=int(random(5,10));
@@ -576,7 +581,8 @@ class something{
   }
 }
 
-//衝突判定クラス
+
+/*衝突判定クラス*/
 class observer{
   player sanpo;
   something some;
@@ -585,7 +591,7 @@ class observer{
     sanpo=_sanpo;
     some=_some;
   }
-  
+  /*情報を更新して当たり判定を行う*/
   boolean update(){
     if(sanpo.py==some.sy&&some.sc!=0&&dist(sanpo.px,sanpo.py,some.sx,some.sy)<=250){
       return true;
