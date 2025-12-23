@@ -1,27 +1,50 @@
+/**
+ * もちばしり：アイテムを三方（さんぽう）に積み上げるアクションゲーム
+ */
+
+/** プレイヤーの操作対象となる三方インスタンス */
 player sanpo;
+/** 各レーン（4行分）に流れるアイテムの生成・更新用インスタンス */
 something someLine1,someLine2,someLine3,someLine4;
+/** プレイヤーと各レーンのアイテムとの衝突を監視するインスタンス */
 observer obLine1,obLine2,obLine3,obLine4;
 
+/** 各レーンごとの衝突判定結果を保持するフラグ */
 boolean hit,hit1,hit2,hit3,hit4;
+/** 終了直前のミカン演出が実行可能か管理するスイッチ */
 boolean ending=true;
-int count=0,countLmt=20;
+/** 現在三方に乗っているアイテムの数 */
+int count=0;
+/** アイテムの最大積載制限数 */
+int countLmt=20;
+
+/** 各種画像リソースを保持する静的変数 */
 static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg;
 
-
+/** 現在の表示シーン（"start", "game", "result", "rule"） */
 String scene="start";
+/** ゲーム開始時のシステム時刻（ミリ秒） */
 int startTime;
-final int gameFinish=10000;//120000;
+/** ゲームの制限時間設定（10000ミリ秒 = 10秒） */
+final int gameFinish=10000;
+/** タイムアップ（終了判定）の状態を保持するフラグ */
 boolean timeUp;
 
+/** スタートボタンの座標とサイズ設定 */
 int buttonX,buttonY,buttonW = 200,buttonH = 70; 
+/** ルールボタンの座標とサイズ設定 */
 int ruleBtnX, ruleBtnY,ruleBtnW = 150,ruleBtnH = 70;
+/** 戻るボタンの座標とサイズ設定 */
 int backBtnX, backBtnY,backBtnW = 150,backBtnH = 70;
 
+/** テキスト描画に使用するフォントデータ */
 PFont myFont;
 
-
+/**
+ * プログラム実行時に一度だけ呼び出される初期設定。
+ * 画面サイズ、リソース読み込み、インスタンス生成を行う。
+ */
 void setup(){
-  //基本設定
   size(1300,700);
   background(#6e7955);
   frameRate(60);
@@ -32,7 +55,7 @@ void setup(){
   myFont = createFont("MS Gothic", 50, true); 
   textFont(myFont);
   
-  //画像読み込み
+  // 画像データのロードとリサイズ
   sanpoImg = loadImage("sanpo.png"); 
   sanpoImg.resize(140, 105);
   mikanImg = loadImage("mikan.png"); 
@@ -56,7 +79,7 @@ void setup(){
   macaronImg = loadImage("macaron.png"); 
   macaronImg.resize(45, 40);
   
-  //クラスのインスタンス作成
+  // クラスのインスタンス初期化
   sanpo=new player();
   someLine1=new something(175);
   someLine2=new something(325);
@@ -67,7 +90,7 @@ void setup(){
   obLine3=new observer(sanpo,someLine3);
   obLine4=new observer(sanpo,someLine4);
   
-  //ボタン定義
+  // UIボタンの基準座標設定
   buttonX = width/2;
   buttonY = height/2+200;
   ruleBtnX = 100;
@@ -76,7 +99,9 @@ void setup(){
   backBtnY = height/2+300;
 }
 
-
+/**
+ * 毎フレーム呼び出されるメインループ。シーン管理を行う。
+ */
 void draw(){
   common();
   if(scene=="start"){
@@ -93,21 +118,21 @@ void draw(){
   }
 }
 
-
-/*毎フレーム実行*/
+/**
+ * 全シーン共通の背景描画処理。
+ */
 void common(){
   background(85,107,47);
 }
 
-
-/*スタート画面*/
+/**
+ * タイトルおよび操作ボタンを描画するスタート画面シーン。
+ */
 void startScene(){
-  //タイトル
   fill(#1f3134);
   textSize(250);
   text("もちばしり", width/2, height/2); 
 
-  //スタートボタン
   fill(#95859c); 
   rect(buttonX, buttonY, buttonW, buttonH, 10); 
   fill(#e7e7eb); 
@@ -115,7 +140,6 @@ void startScene(){
   String buttonText = "はじまり";
   text(buttonText,buttonX, buttonY);
   
-  //ルールボタン
   fill(#705b67);
   rect(ruleBtnX, ruleBtnY, ruleBtnW, ruleBtnH, 10);
   fill(#e7e7eb);
@@ -123,19 +147,17 @@ void startScene(){
   text("きまりごと", ruleBtnX, ruleBtnY);
 }
 
-
-/*ルール画面*/
+/**
+ * 操作方法やゲーム内容を説明するルール画面シーン。
+ */
 void ruleScene(){
-  //タイトル
   fill(0);
   textSize(40);
   text("きまりごと", width/2, 150);
   
-  //説明
   textSize(30);
   text("自分だけの鏡餅を作ろう！\n道に落ちているアイテム", width/2, height/2);
   
-  // 戻るボタンの描画
   fill(100);
   rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
   fill(255);
@@ -143,10 +165,10 @@ void ruleScene(){
   text("戻る", backBtnX, backBtnY);
 }
 
-
-/*ゲーム画面*/
+/**
+ * メインのアクションシーン。各オブジェクトの更新と判定、タイマー表示を行う。
+ */
 void gameScene(){
-  //レーンの生成
   stroke(#dcd3b2);
   line(0,100,1300,100);
   line(0,250,1000,250);
@@ -154,7 +176,6 @@ void gameScene(){
   line(0,550,1000,550);
   line(1000,0,1000,700);
   
-  //各インスタンス更新
   sanpo.update(sanpo.px,sanpo.py);
   someLine1.update();
   someLine2.update();
@@ -165,10 +186,8 @@ void gameScene(){
   hit3=obLine3.update();
   hit4=obLine4.update();
   
-  //当たり判定の実行
   judge(hit1,hit2,hit3,hit4);
   
-  //経過時間の表示
   String timerString=timer();
   textSize(35);
   text(timerString,1150,50);
@@ -177,10 +196,12 @@ void gameScene(){
   }
 }
 
-
-/*リザルト画面*/
+/**
+ * ゲーム終了時の結果を表示するシーン。
+ * スコア計算、アイテム名合成、および獲得した鏡餅の表示を行う。
+ * @param sanpo プレイヤーの所持アイテムを参照するためのプレイヤーインスタンス
+ */
 void resultScene(player sanpo){
-  //終了メッセージ
   fill(0);
   textSize(50);
   text("完走!!!!!!!!!!", width/2, height/2 - 200);
@@ -188,20 +209,18 @@ void resultScene(player sanpo){
   fill(50);
   text("[押すとはじめにもどる]", width/2, height/2 + 200);
   
-  //作成かがみもち
   sanpo.update(75,640);
   
-  //かがみもちresult
   String NameStart="そなたのかがみもちは...";
   text(NameStart,width/2-200, height/2 - 100);
   String fullName="";
   int fullScore=0;
-  //特殊かがみもち
+
+  // 特殊な組み合わせ判定（もち、もち、みかん）
   if(count==3&&sanpo.catchThings.get(0)==2&&sanpo.catchThings.get(1)==2&&sanpo.catchThings.get(2)==1){
     fullName="かがみもち";
     fullScore=100000;
   }
-  //一般かがみもち
   else{
     fullName+="かがみ";
     for(int i=0;i<count;i++){
@@ -209,59 +228,31 @@ void resultScene(player sanpo){
       String itemName="";
       int score=0;
       switch(id){
-        case 1:  
-              itemName = "みかん";
-              score=3;
-              break;
-        case 2:  
-              itemName = "もち";
-              score=2;
-              break;
-        case 4:  
-              itemName = "ベーコン";
-              score=4;
-              break;
-        case 5:  
-              itemName = "たまご";
-              score=3;
-              break;
-        case 6:  
-              itemName = "バーガー";
-              score=4;
-              break;
-        case 7:  
-              itemName = "レタス";
-              score=3;
-              break;
-        case 8:  
-              itemName = "とまと";
-              score=3;
-              break;
-        case 9:  
-              itemName = "オムレツ";
-              score=4;
-              break;
-        case 10: 
-              itemName = "マカロン";
-              score=4;
-              break;
-        default:
-              break;
+        case 1:  itemName = "みかん"; score=3; break;
+        case 2:  itemName = "もち"; score=2; break;
+        case 4:  itemName = "ベーコン"; score=4; break;
+        case 5:  itemName = "たまご"; score=3; break;
+        case 6:  itemName = "バーガー"; score=4; break;
+        case 7:  itemName = "レタス"; score=3; break;
+        case 8:  itemName = "とまと"; score=3; break;
+        case 9:  itemName = "オムレツ"; score=4; break;
+        case 10: itemName = "マカロン"; score=4; break;
+        default: break;
        }
       fullName+=" "+itemName;
       fullScore+=score;
     }
     fullName+=" もち";
   }
-  //結果の表示
   textSize(35);
   fill(#e2041b);
   text(fullName,width/2,height/2,1000,40);
   text("得点："+fullScore+"点",width/2,height/2+100);
 }
 
-
-/*newGame時リセット*/
+/**
+ * ゲームの再開準備として演出フラグや各レーンのアイテム位置・種類を初期化する。
+ */
 void reset() {
   ending=true;
   someLine1.sx = 0;
@@ -274,48 +265,37 @@ void reset() {
   someLine4.sc = 2;
 }
 
-
-/*開始などのボタンが押されたときに動く関数*/
+/**
+ * 画面上のボタンに対するクリック判定およびシーン遷移、ゲーム開始リセットを行う。
+ */
 void mousePressed(){
-  //スタート画面
   if(scene == "start"){
-    //スタートボタンの範囲判定
     if (abs(mouseX-buttonX)<=50&&abs(mouseY-buttonY)<=50) {
       scene = "game"; 
-      
-      //リセットする
       count = 0;
       sanpo.catchThings.clear();
       reset();
       startTime = millis();
     }
-    
-    //ルール説明ボタンの範囲判定
     if (abs(mouseX-ruleBtnX)<=50&&abs(mouseY-ruleBtnY)<=50) {
       scene = "rule"; 
     }
   }
-  
-  //ルール表示画面
   else if(scene=="rule"){
     if(abs(mouseX-backBtnX)<=50&&abs(mouseY-backBtnY)<=50){
       scene="start";
     }
   }
-  
-  //ゲーム画面中
   else if(scene == "game"){
-    // ゲーム中はクリックしても何も起こらない
   }
-  
-  //リザルト画面
   else if(scene == "result"){
-    // リザルトからタイトルへ戻る
     scene = "start";
   }
 }
 
-/*矢印ボタンが押されたタイミングでのみ動くsanpo移動関数*/
+/**
+ * キーボード入力を受け取り、プレイヤーの上移動・下移動命令を発行する。
+ */
 void keyPressed(){
   if(keyCode==UP){
     sanpo.up();
@@ -325,8 +305,9 @@ void keyPressed(){
   }
 }
 
-
-/*終了前強制ミカン*/
+/**
+ * 終了間際の演出として、全レーンのアイテムを高速移動するミカンに強制変更する。
+ */
 void ending(){
   someLine1.sx = 0;
   someLine1.sc = 1;
@@ -342,8 +323,10 @@ void ending(){
   someLine4.sv=27;
 }
 
-
-/*タイマー表示*/
+/**
+ * 経過時間を管理し、残り時間文字列を生成。終了1.2秒前の演出トリガー判定も行う。
+ * @return "分:秒"形式の残り時間文字列
+ */
 String timer(){
   int elapsedTime = millis() - startTime; 
   timeUp = (elapsedTime >= gameFinish);
@@ -351,75 +334,65 @@ String timer(){
   if (totalSeconds < 0){
     totalSeconds = 0;
   }
-  int m = totalSeconds / 60; // 分
-  float ss = totalSeconds % 60; // 秒
+  int m = totalSeconds / 60; 
+  float ss = totalSeconds % 60; 
   int s=int(ss);
   
-  //ミカンエンディングの判定
   if(m==0&&ss<=1.2&&ending){
     ending=false;
     ending();
   }
   
-  //return文字列
   String timeString = m + ":" + nf(s, 2);
   return timeString;
 }
 
-
-/*総合的な衝突判定かつ，どのLineのが当たったのか*/
+/**
+ * 各レーンでの衝突判定結果を統合し、衝突があった場合にプレイヤーの所持品リストを更新する。
+ * @param hit1〜hit4 各レーンごとの衝突有無
+ */
 void judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
-  //当たり判定->どのラインで当たったかのインスタンス保存
   something currentThing=null;
   if(hit1||hit2||hit3||hit4){
     hit=true;
+    if(hit1){ currentThing=someLine1; }
+    else if(hit2){ currentThing=someLine2; }
+    else if(hit3){ currentThing=someLine3; }
+    else if(hit4){ currentThing=someLine4; }
     
-    if(hit1){
-      currentThing=someLine1;
-    }
-    else if(hit2){
-      currentThing=someLine2;
-    }
-    else if(hit3){
-      currentThing=someLine3;
-    }
-    else if(hit4){
-      currentThing=someLine4;
-    }
-    
-    //sanpoの現在のリストと照らし合わせ
-    sanpo.thingsRegulate(currentThing.sc); //警告無視でいい
-    //衝突したものは非表示に
+    sanpo.thingsRegulate(currentThing.sc); 
     currentThing.sc=0;
   }
   else{
     hit=false;
   }
-  
 }
 
-
-/*プレイヤークラス*/
+/**
+ * プレイヤー（三方）および積み上げられたアイテムの状態管理と描画を担当するクラス。
+ */
 class player{
-  //属性
   float px;
   float py;
-  ArrayList<Integer> catchThings; //ラッパークラスの使用(int<->Integer)
+  /** 所持しているアイテムIDを格納する動的配列 */
+  ArrayList<Integer> catchThings; 
   
-  //初期状態の設定
   player(){
     px=1150;
     py=475;
     catchThings=new ArrayList<Integer>();
   }
   
-  /*情報を更新して三方を表示*/
+  /**
+   * 三方の土台と、積み上げられたアイテムを現在のリスト順に描画する。
+   * @param nowX 描画位置のX座標
+   * @param nowY 描画位置のY座標（土台の基準点）
+   */
   void update(float nowX,float nowY){
     image(sanpoImg,nowX,nowY+25);
-    float nowHeight=nowY+25-(sanpoImg.height/2)+10; //+10は調整
+    float nowHeight=nowY+25-(sanpoImg.height/2)+10; 
     for(int i=0;i<count;i++){
       int nowThing=catchThings.get(i);
-      //もち重ね用の変数
       int beforeThing;
       if(i!=0){
         beforeThing=catchThings.get(i-1);
@@ -427,7 +400,6 @@ class player{
       else{
         beforeThing=1;
       }
-      //積み重ねアクション
       switch(nowThing){
         case 1:
               nowHeight=nowHeight-(mikanImg.height/2);
@@ -483,27 +455,23 @@ class player{
     }
   }
   
-  /*いっこあがる*/
+  /** プレイヤーを一つ上のレーンへ移動。一番上の場合は一番下へループする。 */
   void up(){
-    if(py==175){
-      py=625;
-    }
-    else{
-      py-=150;
-    }
+    if(py==175){ py=625; }
+    else{ py-=150; }
   }
   
-  /*いっこさがる*/
+  /** プレイヤーを一つ下のレーンへ移動。一番下の場合は一番上へループする。 */
   void down(){
-    if(py==625){
-      py=175;
-    }
-    else{
-      py+=150;
-    }
+    if(py==625){ py=175; }
+    else{ py+=150; }
   }
   
-  /*ArrayListの管理*/
+  /**
+   * 取得したアイテムをリストに追加、またはカビみかん（ID:3）による削除を行う。
+   * 最大個数(countLmt)を超えた場合は古いものを削除して追加する。
+   * @param choice 取得したアイテムのID
+   */
   void thingsRegulate(int choice){
     switch(choice){
       case 1:
@@ -532,13 +500,15 @@ class player{
   }
 }
 
-
-/*流れてくるものクラス*/
+/**
+ * レーン上に流れるアイテム（または障害物）を管理するクラス。
+ */
 class something{
   float sx;
   float sy;
   float sv;
-  int sc; //s-choice
+  /** 表示するアイテムの種類を決定するID */
+  int sc; 
   
   something(float iny){
     sx=100;
@@ -547,7 +517,9 @@ class something{
     sc=2;
   }
   
-  /*情報を更新して三方を表示*/
+  /**
+   * アイテムの移動を更新し、対応する画像を描画する。画面端到達で再抽選を行う。
+   */
   void update(){
     sx+=sv;
     if(sc==0){
@@ -588,7 +560,6 @@ class something{
     else if(sc==10){
       image(macaronImg,sx,sy);
     }
-    //もしラインを超えていたら初めに戻す
     if(sx>=1000){
       sx=0;
       sv=int(random(5,10));
@@ -597,8 +568,9 @@ class something{
   }
 }
 
-
-/*衝突判定クラス*/
+/**
+ * プレイヤーとレーン上のアイテムとの衝突（位置関係の重複）を判定するクラス。
+ */
 class observer{
   player sanpo;
   something some;
@@ -607,7 +579,11 @@ class observer{
     sanpo=_sanpo;
     some=_some;
   }
-  /*情報を更新して当たり判定を行う*/
+  
+  /**
+   * 現在のプレイヤー座標とアイテム座標、および衝突半径を計算して衝突の成否を返す。
+   * @return 衝突していれば true、していなければ false
+   */
   boolean update(){
     if(sanpo.py==some.sy&&some.sc!=0&&dist(sanpo.px,sanpo.py,some.sx,some.sy)<=250){
       return true;
