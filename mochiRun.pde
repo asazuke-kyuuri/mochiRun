@@ -3,7 +3,6 @@ something someLine1,someLine2,someLine3,someLine4;
 observer obLine1,obLine2,obLine3,obLine4;
 
 boolean hit,hit1,hit2,hit3,hit4;
-int hitThing;
 boolean ending=true;
 int count=0,countLmt=20;
 static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg;
@@ -12,6 +11,7 @@ static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerI
 String scene="start";
 int startTime;
 final int gameFinish=10000;//120000;
+boolean timeUp;
 
 int buttonX,buttonY,buttonW = 200,buttonH = 70; 
 int ruleBtnX, ruleBtnY,ruleBtnW = 150,ruleBtnH = 70;
@@ -169,41 +169,12 @@ void gameScene(){
   judge(hit1,hit2,hit3,hit4);
   
   //経過時間の表示
-  int nowTime=millis()-startTime;
-  int timer=gameFinish/1000-millis()/1000;
+  String timerString=timer();
   textSize(35);
-  String timerTxt=(timer/60)+":";
-  if((2+timer-timer/60*60)<10){
-    timerTxt+="0";
-  }
-  text(timerTxt+(2+timer-timer/60*60),1150,50);
-  
-  //経過時間の判定
-  if((2+timer-timer/60*60)<2&&ending){
-    ending=false;
-    ending();
-  }
-  boolean timeUp=(nowTime>=gameFinish);
+  text(timerString,1150,50);
   if(timeUp){
     scene="result";
   }
-}
-
-
-/*終了前強制ミカン*/
-void ending(){
-  someLine1.sx = 0;
-  someLine1.sc = 1;
-  someLine1.sv=15;
-  someLine2.sx = 0;
-  someLine2.sc = 1;
-  someLine2.sv=15;
-  someLine3.sx = 0;
-  someLine3.sc = 1;
-  someLine3.sv=15;
-  someLine4.sx = 0;
-  someLine4.sc = 1;
-  someLine4.sv=15;
 }
 
 
@@ -244,7 +215,7 @@ void resultScene(player sanpo){
               score=2;
               break;
         case 4:  
-              itemName = "べぇこん";
+              itemName = "ベーコン";
               score=4;
               break;
         case 5:  
@@ -252,11 +223,11 @@ void resultScene(player sanpo){
               score=3;
               break;
         case 6:  
-              itemName = "ばぁがぁ";
+              itemName = "バーガー";
               score=4;
               break;
         case 7:  
-              itemName = "れたす";
+              itemName = "レタス";
               score=3;
               break;
         case 8:  
@@ -264,11 +235,11 @@ void resultScene(player sanpo){
               score=3;
               break;
         case 9:  
-              itemName = "おむれつ";
+              itemName = "オムレツ";
               score=4;
               break;
         case 10: 
-              itemName = "まかろん";
+              itemName = "マカロン";
               score=4;
               break;
         default:
@@ -350,6 +321,48 @@ void keyPressed(){
     sanpo.down();
   }
 }
+
+
+/*終了前強制ミカン*/
+void ending(){
+  someLine1.sx = 0;
+  someLine1.sc = 1;
+  someLine1.sv=27;
+  someLine2.sx = 0;
+  someLine2.sc = 1;
+  someLine2.sv=27;
+  someLine3.sx = 0;
+  someLine3.sc = 1;
+  someLine3.sv=27;
+  someLine4.sx = 0;
+  someLine4.sc = 1;
+  someLine4.sv=27;
+}
+
+
+/*タイマー表示*/
+String timer(){
+  int elapsedTime = millis() - startTime; 
+  timeUp = (elapsedTime >= gameFinish);
+  int totalSeconds = ceil((gameFinish - elapsedTime) / 1000.0);
+  if (totalSeconds < 0){
+    totalSeconds = 0;
+  }
+  int m = totalSeconds / 60; // 分
+  float ss = totalSeconds % 60; // 秒
+  int s=int(ss);
+  
+  //ミカンエンディングの判定
+  if(m==0&&ss<=1.2&&ending){
+    ending=false;
+    ending();
+  }
+  
+  //return文字列
+  String timeString = m + ":" + nf(s, 2);
+  return timeString;
+}
+
 
 /*総合的な衝突判定かつ，どのLineのが当たったのか*/
 void judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
