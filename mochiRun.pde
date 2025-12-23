@@ -155,7 +155,7 @@ void gameScene(){
   line(1000,0,1000,700);
   
   //各インスタンス更新
-  sanpo.update();
+  sanpo.update(sanpo.px,sanpo.py);
   someLine1.update();
   someLine2.update();
   someLine3.update();
@@ -187,6 +187,9 @@ void resultScene(player sanpo){
   textSize(30); 
   fill(50);
   text("[押すとはじめにもどる]", width/2, height/2 + 200);
+  
+  //作成かがみもち
+  sanpo.update(75,640);
   
   //かがみもちresult
   String NameStart="そなたのかがみもちは...";
@@ -411,9 +414,9 @@ class player{
   }
   
   /*情報を更新して三方を表示*/
-  void update(){
-    image(sanpoImg,px,py+25);
-    float nowHeight=py+25-(sanpoImg.height/2)+10; //+10は調整
+  void update(float nowX,float nowY){
+    image(sanpoImg,nowX,nowY+25);
+    float nowHeight=nowY+25-(sanpoImg.height/2)+10; //+10は調整
     for(int i=0;i<count;i++){
       int nowThing=catchThings.get(i);
       //もち重ね用の変数
@@ -428,7 +431,7 @@ class player{
       switch(nowThing){
         case 1:
               nowHeight=nowHeight-(mikanImg.height/2);
-              image(mikanImg,px,nowHeight);
+              image(mikanImg,nowX,nowHeight);
               nowHeight=nowHeight-(mikanImg.height/2);
               break;
         case 2:
@@ -436,42 +439,42 @@ class player{
               if(beforeThing==2){
                 nowHeight=nowHeight+15;
               }
-              image(mochiImg,px,nowHeight);
+              image(mochiImg,nowX,nowHeight);
               nowHeight=nowHeight-(mochiImg.height/2);
               break;
         case 4:
               nowHeight=nowHeight-(baconImg.height/2);
-              image(baconImg,px,nowHeight);
+              image(baconImg,nowX,nowHeight);
               nowHeight=nowHeight-(baconImg.height/2);
               break;
         case 5:
               nowHeight=nowHeight-(eggImg.height/2);
-              image(eggImg,px,nowHeight);
+              image(eggImg,nowX,nowHeight);
               nowHeight=nowHeight-(eggImg.height/2);
               break;
         case 6:
               nowHeight=nowHeight-(hamburgerImg.height/2)+10;
-              image(hamburgerImg,px,nowHeight);
+              image(hamburgerImg,nowX,nowHeight);
               nowHeight=nowHeight-(hamburgerImg.height/2);
               break;
         case 7:
               nowHeight=nowHeight-(lettuceImg.height/2);
-              image(lettuceImg,px,nowHeight);
+              image(lettuceImg,nowX,nowHeight);
               nowHeight=nowHeight-(lettuceImg.height/2);
               break;
         case 8:
               nowHeight=nowHeight-(tomatoImg.height/2);
-              image(tomatoImg,px,nowHeight);
+              image(tomatoImg,nowX,nowHeight);
               nowHeight=nowHeight-(tomatoImg.height/2);
               break;
         case 9:
               nowHeight=nowHeight-(omuImg.height/2)+10;
-              image(omuImg,px,nowHeight);
+              image(omuImg,nowX,nowHeight);
               nowHeight=nowHeight-(omuImg.height/2);
               break;
         case 10:
               nowHeight=nowHeight-(macaronImg.height/2);
-              image(macaronImg,px,nowHeight);
+              image(macaronImg,nowX,nowHeight);
               nowHeight=nowHeight-(macaronImg.height/2);
               break;
         default:
