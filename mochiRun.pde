@@ -17,6 +17,8 @@ boolean ending=true;
 int count=0;
 /** アイテムの最大積載制限数 */
 int countLmt=20;
+/** カビミカンの残機数 */
+int kabiCount=3;
 
 /** 各種画像リソースを保持する静的変数 */
 static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg;
@@ -156,7 +158,11 @@ void ruleScene(){
   text("きまりごと", width/2, 150);
   
   textSize(30);
-  text("自分だけの鏡餅を作ろう！\n道に落ちているアイテム", width/2, height/2);
+  text("自分だけの鏡餅を作ろう！\n矢印キーで三方を操作して，流れてくる食べ物をキャッチしよう！\nスコアは積んだ食べ物の文字数の合計だよ\nいっぱい積んで自分だけのかがみもちを作ろう！", width/2, height/2-50);
+  
+  image(kabiMikanImg,width/4,height/1.6);
+  textSize(20);
+  text("カビみかんをとると，一番上の食べ物がなくなるよ\n4個めを取るとゲームオーバーになっちゃうから気を付けてね",width/4,height/1.4);
   
   fill(100);
   rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
@@ -191,7 +197,10 @@ void gameScene(){
   String timerString=timer();
   textSize(35);
   text(timerString,1150,50);
-  if(timeUp){
+  
+  kabiLife(kabiCount);
+  
+  if(timeUp||kabiCount==0){
     scene="result";
   }
 }
@@ -255,14 +264,15 @@ void resultScene(player sanpo){
  */
 void reset() {
   ending=true;
+  kabiCount=3;
   someLine1.sx = 0;
-  someLine1.sc = 2;
+  someLine1.sc = 3;
   someLine2.sx = 0;
-  someLine2.sc = 2;
+  someLine2.sc = 3;
   someLine3.sx = 0;
-  someLine3.sc = 2;
+  someLine3.sc = 3;
   someLine4.sx = 0;
-  someLine4.sc = 2;
+  someLine4.sc = 3;
 }
 
 /**
@@ -338,13 +348,24 @@ String timer(){
   float ss = totalSeconds % 60; 
   int s=int(ss);
   
-  if(m==0&&ss<=1.2&&ending){
+  if(m==0&&ss<=1.05&&ending){
     ending=false;
     ending();
   }
   
   String timeString = m + ":" + nf(s, 2);
   return timeString;
+}
+
+/**
+ * カビみかん獲得個数による残りライフの表示を行う．
+ */
+void kabiLife(int kabiCount){
+  float kabiWidth=kabiMikanImg.width/2+5,kabiHeight=50;
+  for(int i=0;i<kabiCount;i++){
+    image(kabiMikanImg,kabiWidth,kabiHeight);
+    kabiWidth+=kabiMikanImg.width+5;
+  }
 }
 
 /**
@@ -483,6 +504,7 @@ class player{
             count++;
             break;
       case 3:
+            kabiCount--;
             if(count!=0){
               catchThings.remove(count-1);
               count--;
