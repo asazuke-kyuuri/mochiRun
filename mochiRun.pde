@@ -1,6 +1,8 @@
 /**
  * もちばしり：アイテムを三方（さんぽう）に積み上げるアクションゲーム
  */
+/** サウンドライブラリの読み込み */
+import processing.sound.*;
 
 /** プレイヤーの操作対象となる三方インスタンス */
 player sanpo;
@@ -20,6 +22,9 @@ int kabiCount=3;
 
 /** 各種画像リソースを保持する静的変数 */
 static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg,kagamimochiImg,patissierImg,maniaImg,BLTImg,healthImg;
+
+/** 効果音 */
+SoundFile button,get,damage;
 
 /** 現在の表示シーン（"start", "game", "result", "rule"） */
 String scene="start";
@@ -87,6 +92,12 @@ void setup(){
   maniaImg=loadImage("mania.png");
   BLTImg=loadImage("BLT.png");
   healthImg=loadImage("health.png");
+  
+  
+  // 音声データのロード
+  button = new SoundFile(this, "button.mp3");
+  get = new SoundFile(this, "get.mp3");
+  damage = new SoundFile(this, "damage.mp3");
   
   // クラスのインスタンス初期化
   sanpo=new player();
@@ -371,13 +382,13 @@ void resultScene(player sanpo){
 void reset() {
   kabiCount=3;
   someLine1.sx = 0;
-  someLine1.sc = 4;
+  someLine1.sc = 2;
   someLine2.sx = 0;
-  someLine2.sc = 7;
+  someLine2.sc = 2;
   someLine3.sx = 0;
-  someLine3.sc = 8;
+  someLine3.sc = 2;
   someLine4.sx = 0;
-  someLine4.sc = 4;
+  someLine4.sc = 2;
 }
 
 /**
@@ -391,28 +402,34 @@ void mousePressed(){
       sanpo.catchThings.clear();
       reset();
       startTime = millis();
+      button.play();
     }
     if (abs(mouseX-ruleBtnX)<=80&&abs(mouseY-ruleBtnY)<=50) {
       scene = "rule"; 
+      button.play();
     }
     if (abs(mouseX-collectBtnX)<=80&&abs(mouseY-collectBtnY)<=50) {
       scene = "collection"; 
+      button.play();
     }
   }
   else if(scene=="rule"){
     if(abs(mouseX-backBtnX)<=80&&abs(mouseY-backBtnY)<=50){
       scene="start";
+      button.play();
     }
   }
   else if(scene=="collection"){
     if(abs(mouseX-backBtnX)<=80&&abs(mouseY-backBtnY)<=50){
       scene="start";
+      button.play();
     }
   }
   else if(scene == "game"){
   }
   else if(scene == "result"){
     scene = "start";
+    button.play();
   }
 }
 
@@ -592,6 +609,7 @@ class player{
             }
             catchThings.add(count,choice);
             count++;
+            get.play();
             break;
       case 3:
             kabiCount--;
@@ -599,6 +617,7 @@ class player{
               catchThings.remove(count-1);
               count--;
             }
+            damage.play();
             break;
       default:
             if(count>=countLmt){
@@ -607,6 +626,7 @@ class player{
             }
             catchThings.add(count,choice);
             count++;
+            get.play();
             break;
     }
   }
