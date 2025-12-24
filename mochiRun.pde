@@ -19,10 +19,12 @@ int countLmt=20;
 int kabiCount=3;
 
 /** 各種画像リソースを保持する静的変数 */
-static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg;
+static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg,kagamimochiImg,patissierImg,maniaImg,BLTImg,healthImg;
 
 /** 現在の表示シーン（"start", "game", "result", "rule"） */
 String scene="start";
+/** 獲得コレクション */
+boolean kagamimochi=false,patissier=false,mania=false,BLT=false,health=false;
 /** ゲーム開始時のシステム時刻（ミリ秒） */
 int startTime;
 /** ゲームの制限時間設定（10000ミリ秒 = 10秒） */
@@ -80,6 +82,11 @@ void setup(){
   omuImg.resize(75, 40);
   macaronImg = loadImage("macaron.png"); 
   macaronImg.resize(45, 40);
+  kagamimochiImg=loadImage("kagamimochi.png");
+  patissierImg=loadImage("patissier.png");
+  maniaImg=loadImage("mania.png");
+  BLTImg=loadImage("BLT.png");
+  healthImg=loadImage("health.png");
   
   // クラスのインスタンス初期化
   sanpo=new player();
@@ -193,7 +200,29 @@ void collectScene(){
   textSize(40);
   text("コレクション", width/2, 150);
   textSize(30);
-  text("なにかをいい感じに3つだけ積むとコレクションができるかも．．．", width/2, height/2-150);
+  text("いい感じに3つだけ積むとコレクションができるかも．．．", width/2, height/2-150);
+  
+  text("かがみもち",width/6,550);
+  text("パティシエ",(width/6)*2,550);
+  text("ハンバーガー\nジャンキー",(width/6)*3,550);
+  text("BLT",(width/6)*4,550);
+  text("健康志向",(width/6)*5,550);
+  
+  if(kagamimochi){
+    image(kagamimochiImg,width/6,400);
+  }
+  if(patissier){
+    image(patissierImg,(width/6)*2,400);
+  }
+  if(mania){
+    image(maniaImg,(width/6)*3,400);
+  }
+  if(BLT){
+    image(BLTImg,(width/6)*4,400);
+  }
+  if(health){
+    image(healthImg,(width/6)*5,400);
+  }
   
   fill(100);
   rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
@@ -283,18 +312,27 @@ void resultScene(player sanpo){
   if(count==3&&sanpo.catchThings.get(0)==2&&sanpo.catchThings.get(1)==2&&sanpo.catchThings.get(2)==1){
     fullName="かがみもち";
     fullScore=100000000;
+    kagamimochi=true;
   }
   else if(count==3&&sanpo.catchThings.get(0)==10&&sanpo.catchThings.get(1)==10&&sanpo.catchThings.get(2)==10){
     fullName="パティシエ";
     fullScore=100000;
+    patissier=true;
   }
   else if(count==3&&sanpo.catchThings.get(0)==6&&sanpo.catchThings.get(1)==6&&sanpo.catchThings.get(2)==6){
-    fullName="ハンバーガーマニア";
+    fullName="ハンバーガージャンキー";
     fullScore=100000;
+    mania=true;
   }
   else if(count==3&&sanpo.catchThings.get(0)==4&&sanpo.catchThings.get(1)==7&&sanpo.catchThings.get(2)==8){
     fullName="BLT";
     fullScore=100000;
+    BLT=true;
+  }
+  else if(count==3&&sanpo.catchThings.get(0)==7&&sanpo.catchThings.get(1)==7&&sanpo.catchThings.get(2)==7){
+    fullName="健康志向";
+    fullScore=100000;
+    health=true;
   }
   else{
     fullName+="かがみ";
@@ -334,13 +372,13 @@ void resultScene(player sanpo){
 void reset() {
   kabiCount=3;
   someLine1.sx = 0;
-  someLine1.sc = 3;
+  someLine1.sc = 4;
   someLine2.sx = 0;
-  someLine2.sc = 3;
+  someLine2.sc = 7;
   someLine3.sx = 0;
-  someLine3.sc = 3;
+  someLine3.sc = 8;
   someLine4.sx = 0;
-  someLine4.sc = 3;
+  someLine4.sc = 4;
 }
 
 /**
