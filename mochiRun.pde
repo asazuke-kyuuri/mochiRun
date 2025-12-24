@@ -11,8 +11,6 @@ observer obLine1,obLine2,obLine3,obLine4;
 
 /** 各レーンごとの衝突判定結果を保持するフラグ */
 boolean hit,hit1,hit2,hit3,hit4;
-/** 終了直前のミカン演出が実行可能か管理するスイッチ */
-boolean ending=true;
 /** 現在三方に乗っているアイテムの数 */
 int count=0;
 /** アイテムの最大積載制限数 */
@@ -28,7 +26,7 @@ String scene="start";
 /** ゲーム開始時のシステム時刻（ミリ秒） */
 int startTime;
 /** ゲームの制限時間設定（10000ミリ秒 = 10秒） */
-final int gameFinish=10000;
+final int gameFinish=20000;
 /** タイムアップ（終了判定）の状態を保持するフラグ */
 boolean timeUp;
 
@@ -38,6 +36,8 @@ int buttonX,buttonY,buttonW = 200,buttonH = 70;
 int ruleBtnX, ruleBtnY,ruleBtnW = 150,ruleBtnH = 70;
 /** 戻るボタンの座標とサイズ設定 */
 int backBtnX, backBtnY,backBtnW = 150,backBtnH = 70;
+/** コレクションボタンの座標とサイズ設定 */
+int collectBtnX, collectBtnY,collectBtnW = 150,collectBtnH = 70;
 
 /** テキスト描画に使用するフォントデータ */
 PFont myFont;
@@ -97,6 +97,8 @@ void setup(){
   buttonY = height/2+200;
   ruleBtnX = 100;
   ruleBtnY = 50;
+  collectBtnX = 300;
+  collectBtnY = 50;
   backBtnX = width/2;
   backBtnY = height/2+300;
 }
@@ -120,6 +122,9 @@ void draw(){
   }
   else if(scene=="rule"){
     ruleScene();
+  }
+  else if(scene=="collection"){
+    collectScene();
   }
 }
 
@@ -150,6 +155,12 @@ void startScene(){
   fill(#e7e7eb);
   textSize(24);
   text("きまりごと", ruleBtnX, ruleBtnY);
+  
+  fill(#705b67);
+  rect(collectBtnX, collectBtnY, collectBtnW, collectBtnH, 10);
+  fill(#e7e7eb);
+  textSize(24);
+  text("コレクション", collectBtnX, collectBtnY);
 }
 
 /**
@@ -172,6 +183,24 @@ void ruleScene(){
   fill(255);
   textSize(24);
   text("戻る", backBtnX, backBtnY);
+}
+
+/**
+ * コレクション画面シーン。
+ */
+void collectScene(){
+  fill(0);
+  textSize(40);
+  text("コレクション", width/2, 150);
+  textSize(30);
+  text("なにかをいい感じに3つだけ積むとコレクションができるかも．．．", width/2, height/2-150);
+  
+  fill(100);
+  rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
+  fill(255);
+  textSize(24);
+  text("戻る", backBtnX, backBtnY);
+  
 }
 
 /**
@@ -238,7 +267,7 @@ void gameOverScene(){
 void resultScene(player sanpo){
   fill(0);
   textSize(50);
-  text("完走!!!!!!!!!!", width/2, height/2 - 200);
+  text("完走!!!!!!!!!!", width/2, height/2 - 150);
   textSize(30); 
   fill(50);
   text("[押すとはじめにもどる]", width/2, height/2 + 200);
@@ -250,9 +279,21 @@ void resultScene(player sanpo){
   String fullName="";
   int fullScore=0;
 
-  // 特殊な組み合わせ判定（もち、もち、みかん）
+  // 特殊な組み合わせ判定
   if(count==3&&sanpo.catchThings.get(0)==2&&sanpo.catchThings.get(1)==2&&sanpo.catchThings.get(2)==1){
     fullName="かがみもち";
+    fullScore=100000000;
+  }
+  else if(count==3&&sanpo.catchThings.get(0)==10&&sanpo.catchThings.get(1)==10&&sanpo.catchThings.get(2)==10){
+    fullName="パティシエ";
+    fullScore=100000;
+  }
+  else if(count==3&&sanpo.catchThings.get(0)==6&&sanpo.catchThings.get(1)==6&&sanpo.catchThings.get(2)==6){
+    fullName="ハンバーガーマニア";
+    fullScore=100000;
+  }
+  else if(count==3&&sanpo.catchThings.get(0)==4&&sanpo.catchThings.get(1)==7&&sanpo.catchThings.get(2)==8){
+    fullName="BLT";
     fullScore=100000;
   }
   else{
@@ -274,13 +315,16 @@ void resultScene(player sanpo){
         default: break;
        }
       fullName+=" "+itemName;
+      if((i+1)!=0&&(i+1)%5==0){
+        fullName+="\n";
+      }
       fullScore+=score;
     }
     fullName+=" もち";
   }
   textSize(35);
   fill(#e2041b);
-  text(fullName,width/2,height/2,1000,40);
+  text(fullName, width/2, height/2, 1100, 250);
   text("得点："+fullScore+"点",width/2,height/2+100);
 }
 
@@ -288,7 +332,6 @@ void resultScene(player sanpo){
  * ゲームの再開準備として演出フラグや各レーンのアイテム位置・種類を初期化する。
  */
 void reset() {
-  ending=true;
   kabiCount=3;
   someLine1.sx = 0;
   someLine1.sc = 3;
@@ -312,12 +355,20 @@ void mousePressed(){
       reset();
       startTime = millis();
     }
-    if (abs(mouseX-ruleBtnX)<=50&&abs(mouseY-ruleBtnY)<=50) {
+    if (abs(mouseX-ruleBtnX)<=80&&abs(mouseY-ruleBtnY)<=50) {
       scene = "rule"; 
+    }
+    if (abs(mouseX-collectBtnX)<=80&&abs(mouseY-collectBtnY)<=50) {
+      scene = "collection"; 
     }
   }
   else if(scene=="rule"){
-    if(abs(mouseX-backBtnX)<=50&&abs(mouseY-backBtnY)<=50){
+    if(abs(mouseX-backBtnX)<=80&&abs(mouseY-backBtnY)<=50){
+      scene="start";
+    }
+  }
+  else if(scene=="collection"){
+    if(abs(mouseX-backBtnX)<=80&&abs(mouseY-backBtnY)<=50){
       scene="start";
     }
   }
@@ -340,23 +391,6 @@ void keyPressed(){
   }
 }
 
-/**
- * 終了間際の演出として、全レーンのアイテムを高速移動するミカンに強制変更する。
- */
-void ending(){
-  someLine1.sx = 0;
-  someLine1.sc = 1;
-  someLine1.sv=27;
-  someLine2.sx = 0;
-  someLine2.sc = 1;
-  someLine2.sv=27;
-  someLine3.sx = 0;
-  someLine3.sc = 1;
-  someLine3.sv=27;
-  someLine4.sx = 0;
-  someLine4.sc = 1;
-  someLine4.sv=27;
-}
 
 /**
  * 経過時間を管理し、残り時間文字列を生成。終了1.2秒前の演出トリガー判定も行う。
@@ -370,13 +404,7 @@ String timer(){
     totalSeconds = 0;
   }
   int m = totalSeconds / 60; 
-  float ss = totalSeconds % 60; 
-  int s=int(ss);
-  
-  if(m==0&&ss<=1.05&&ending){
-    ending=false;
-    ending();
-  }
+  int s=totalSeconds % 60; 
   
   String timeString = m + ":" + nf(s, 2);
   return timeString;
