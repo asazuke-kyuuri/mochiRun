@@ -154,14 +154,13 @@ void startScene(){
   rect(buttonX, buttonY, buttonW, buttonH, 10); 
   fill(#e7e7eb); 
   textSize(32);
-  String buttonText = "はじまり";
-  text(buttonText,buttonX, buttonY);
+  text("スタート",buttonX, buttonY);
   
   fill(#705b67);
   rect(ruleBtnX, ruleBtnY, ruleBtnW, ruleBtnH, 10);
   fill(#e7e7eb);
   textSize(24);
-  text("きまりごと", ruleBtnX, ruleBtnY);
+  text("説明", ruleBtnX, ruleBtnY);
   
   fill(#705b67);
   rect(collectBtnX, collectBtnY, collectBtnW, collectBtnH, 10);
@@ -176,14 +175,14 @@ void startScene(){
 void ruleScene(){
   fill(0);
   textSize(40);
-  text("きまりごと", width/2, 150);
+  text("説明", width/2, 150);
   
   textSize(30);
-  text("自分だけの鏡餅を作ろう！\n矢印キーで三方を操作して，流れてくる食べ物をキャッチしよう！\nスコアは積んだ食べ物の文字数の合計だよ\nいっぱい積んで自分だけのかがみもちを作ろう！", width/2, height/2-50);
+  text("自分だけの鏡餅を作ろう！\n矢印キー↑↓で三方を操作して，流れてくる食べ物をキャッチしよう！\nスコアは積んだ食べ物の文字数の合計だよ\nいっぱい積んで自分だけのかがみもちを作ろう！", width/2, height/2-50);
   
   image(kabiMikanImg,width/4,height/1.6);
   textSize(20);
-  text("カビみかんをとると，一番上の食べ物がなくなるよ\n4個めを取るとゲームオーバーになっちゃうから気を付けてね",width/4,height/1.4);
+  text("カビみかんをとると，一番上の食べ物がなくなるよ\n4個目を取るとゲームオーバーになっちゃうから気を付けてね",width/4,height/1.4);
   
   fill(100);
   rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
