@@ -112,6 +112,9 @@ void draw(){
   else if(scene=="game"){
     gameScene();
   }
+  else if(scene=="gameOver"){
+    gameOverScene();
+  }
   else if(scene=="result"){
     resultScene(sanpo);
   }
@@ -200,8 +203,30 @@ void gameScene(){
   
   kabiLife(kabiCount);
   
-  if(timeUp||kabiCount==0){
+  if(kabiCount==0){
+    startTime=millis();
+    scene="gameOver";
+  }
+  
+  if(timeUp){
     scene="result";
+  }
+}
+
+/**
+ * ゲームオーバーを表示するシーン。
+ */
+void gameOverScene(){
+  background(85,107,47);
+  sanpo.update(75,600);
+  
+  fill(255, 0, 0);
+  textSize(80);
+  text("Game Over...", width/2, height/2);
+  
+  // 2秒（2000ミリ秒）経過したらリザルトへ
+  if(millis() - startTime > 2000){
+    scene = "result";
   }
 }
 
