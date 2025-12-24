@@ -306,7 +306,7 @@ void gameOverScene(){
 void resultScene(player sanpo){
   fill(0);
   textSize(50);
-  text("完走!!!!!!!!!!", width/2, height/2 - 150);
+  text("完走!!!!!!!!!!", width/2, height/2 - 250);
   textSize(30); 
   fill(50);
   text("[押すとはじめにもどる]", width/2, height/2 + 200);
@@ -314,7 +314,7 @@ void resultScene(player sanpo){
   sanpo.update(75,640);
   
   String NameStart="そなたのかがみもちは...";
-  text(NameStart,width/2-200, height/2 - 100);
+  text(NameStart,width/2-200, height/2 - 150);
   String fullName="";
   int fullScore=0;
 
