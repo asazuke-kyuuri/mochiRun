@@ -1,374 +1,767 @@
-import java.util.ArrayList;
+/**
+ * もちばしり：アイテムを三方（さんぽう）に積み上げるアクションゲーム
+ */
+/** サウンドライブラリの読み込み */
+import processing.sound.*;
+
+/** プレイヤーの操作対象となる三方インスタンス */
+player sanpo;
+/** 各レーン（4行分）に流れるアイテムの生成・更新用インスタンス */
+something someLine1,someLine2,someLine3,someLine4;
+/** プレイヤーと各レーンのアイテムとの衝突を監視するインスタンス */
+observer obLine1,obLine2,obLine3,obLine4;
+
+/** 各レーンごとの衝突判定結果を保持するフラグ */
+boolean hit,hit1,hit2,hit3,hit4;
+/** 現在三方に乗っているアイテムの数 */
+int count=0;
+/** アイテムの最大積載制限数 */
+int countLmt=20;
+/** カビミカンの残機数 */
+int kabiCount=3;
+
+/** 各種画像リソースを保持する静的変数 */
+static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg,kagamimochiImg,patissierImg,maniaImg,BLTImg,healthImg,forest1Img,forest2Img;
+
+/** 効果音 */
+SoundFile button,get,damage,gameOver;
+
+/** 現在の表示シーン（"start", "game", "result", "rule"） */
+String scene="start";
+/** 獲得コレクション */
+boolean kagamimochi=false,patissier=false,mania=false,BLT=false,health=false;
+/** ゲーム開始時のシステム時刻（ミリ秒） */
+int startTime;
+/** ゲームの制限時間設定（10000ミリ秒 = 10秒） */
+final int gameFinish=30000;
+/** タイムアップ（終了判定）の状態を保持するフラグ */
+boolean timeUp;
+/** 現在の動く背景画像位置 */
+float bGX=width/2,bGY=350;
+
+/** スタートボタンの座標とサイズ設定 */
+int buttonX,buttonY,buttonW = 200,buttonH = 70; 
+/** ルールボタンの座標とサイズ設定 */
+int ruleBtnX, ruleBtnY,ruleBtnW = 150,ruleBtnH = 70;
+/** 戻るボタンの座標とサイズ設定 */
+int backBtnX, backBtnY,backBtnW = 150,backBtnH = 70;
+/** コレクションボタンの座標とサイズ設定 */
+int collectBtnX, collectBtnY,collectBtnW = 150,collectBtnH = 70;
+
+/** テキスト描画に使用するフォントデータ */
+PFont myFont;
 
 /**
- * もちばしり：アイテムを三方（さんぽう）に積み上げるアクションゲーム。
- * 流れてくる食べ物をキャッチし、特定の組み合わせを集めることでコレクションを解放します。
+ * プログラム実行時に一度だけ呼び出される初期設定。
+ * 画面サイズ、リソース読み込み、インスタンス生成を行う。
  */
-public class MochiHashiri extends PApplet {
+void setup(){
+  size(1300,700);
+  background(#6e7955);
+  frameRate(60);
+  rectMode(CENTER);
+  imageMode(CENTER);
+  textSize(50);
+  textAlign(CENTER, CENTER);
+  myFont = createFont("MS Gothic", 50, true); 
+  textFont(myFont);
 
-  /** プレイヤーの操作対象となる三方（さんぽう）管理インスタンス */
-  player sanpo;
-  /** 各レーン（全4行）に流れるアイテムの生成・更新・描画用インスタンス */
-  something someLine1, someLine2, someLine3, someLine4;
-  /** プレイヤーと各レーンのアイテムとの物理的な衝突を監視するインスタンス */
-  observer obLine1, obLine2, obLine3, obLine4;
+  // 画像データのロードとリサイズ
+  sanpoImg = loadImage("sanpo.png"); 
+  sanpoImg.resize(140, 105);
+  mikanImg = loadImage("mikan.png"); 
+  mikanImg.resize(45, 40);
+  mochiImg = loadImage("mochi.png");
+  mochiImg.resize(75, 40);
+  kabiMikanImg = loadImage("kabiMikan.png");
+  kabiMikanImg.resize(45,40);
+  baconImg = loadImage("bacon.png");
+  baconImg.resize(75, 20);
+  eggImg = loadImage("egg.png");
+  eggImg.resize(75, 30);
+  hamburgerImg = loadImage("hamburger.png");
+  hamburgerImg.resize(75, 40);
+  lettuceImg = loadImage("lettuce.png");
+  lettuceImg.resize(75, 40);
+  tomatoImg = loadImage("tomato.png");
+  tomatoImg.resize(75, 40);
+  omuImg = loadImage("omu.png");
+  omuImg.resize(75, 40);
+  macaronImg = loadImage("macaron.png"); 
+  macaronImg.resize(45, 40);
+  kagamimochiImg=loadImage("kagamimochi.png");
+  patissierImg=loadImage("patissier.png");
+  maniaImg=loadImage("mania.png");
+  BLTImg=loadImage("BLT.png");
+  healthImg=loadImage("health.png");
+  forest1Img=loadImage("forest.jpg");
+  forest1Img.resize(1300,700);
+  forest2Img=loadImage("forest.jpg");
+  forest2Img.resize(1300,700);
 
-  /** 全レーン共通の衝突判定フラグ。いずれかのレーンで衝突が発生した際にtrueとなる */
-  boolean hit, hit1, hit2, hit3, hit4;
-  /** 現在プレイヤーが三方に積み上げているアイテムの総数 */
-  int count = 0;
-  /** 三方に積み上げ可能なアイテムの最大制限数 */
-  int countLmt = 20;
-  /** カビミカンを取得できる残機数。0になるとゲームオーバー */
-  int kabiCount = 3;
+  // 音声データのロード
+  button = new SoundFile(this, "button.mp3");
+  get = new SoundFile(this, "get.mp3");
+  damage = new SoundFile(this, "damage.mp3");
+  gameOver= new SoundFile(this,"gameOver.mp3");
 
-  /** ゲーム内で使用される全画像リソースの静的保持変数 */
-  static PImage sanpoImg, mikanImg, mochiImg, kabiMikanImg, baconImg, eggImg, hamburgerImg, lettuceImg, tomatoImg, omuImg, macaronImg, kagamimochiImg, patissierImg, maniaImg, BLTImg, healthImg, forest1Img, forest2Img;
+  // クラスのインスタンス初期化
+  sanpo=new player();
+  someLine1=new something(175);
+  someLine2=new something(325);
+  someLine3=new something(475);
+  someLine4=new something(625);
+  obLine1=new observer(sanpo,someLine1);
+  obLine2=new observer(sanpo,someLine2);
+  obLine3=new observer(sanpo,someLine3);
+  obLine4=new observer(sanpo,someLine4);
 
-  /** UI操作、アイテム取得、ダメージ、ゲーム終了時に再生される効果音 */
-  SoundFile button, get, damage, gameOver;
+  // UIボタンの基準座標設定
+  buttonX = width/2;
+  buttonY = height/2+200;
+  ruleBtnX = 100;
+  ruleBtnY = 50;
+  collectBtnX = 300;
+  collectBtnY = 50;
+  backBtnX = width/2;
+  backBtnY = height/2+300;
+}
 
-  /** 現在アクティブな画面（"start", "game", "gameOver", "result", "rule", "collection"） */
-  String scene = "start";
-  /** 各特殊コレクションの獲得状態フラグ */
-  boolean kagamimochi = false, patissier = false, mania = false, BLT = false, health = false;
-  /** 各シーンにおける時間経過判定の基準となる開始時刻（ミリ秒） */
-  int startTime;
-  /** ゲームシーンの標準制限時間（20000ミリ秒 = 20秒） */
-  final int gameFinish = 30000;
-  /** 制限時間に達したかどうかを保持するフラグ */
-  boolean timeUp;
-  /** スクロール背景の基準X座標 */
-  float bGX = 650, bGY = 350;
+/**
+ * 毎フレーム呼び出されるメインループ。シーン管理を行う。
+ */
+void draw(){
+  common();
+  if(scene=="game"){
+    tint(255,100);
+    moveBack();
+  }
+  noTint();
+  if(scene=="start"){
+    startScene();
+  }
+  else if(scene=="game"){
+    gameScene();
+  }
+  else if(scene=="gameOver"){
+    gameOverScene();
+  }
+  else if(scene=="result"){
+    resultScene(sanpo);
+  }
+  else if(scene=="rule"){
+    ruleScene();
+  }
+  else if(scene=="collection"){
+    collectScene();
+  }
+}
 
-  /** スタートボタンの表示座標と矩形サイズ */
-  int buttonX, buttonY, buttonW = 200, buttonH = 70; 
-  /** ルール説明ボタンの表示座標と矩形サイズ */
-  int ruleBtnX, ruleBtnY, ruleBtnW = 150, ruleBtnH = 70;
-  /** 共通「戻る」ボタンの表示座標と矩形サイズ */
-  int backBtnX, backBtnY, backBtnW = 150, backBtnH = 70;
-  /** コレクション画面遷移ボタンの表示座標と矩形サイズ */
-  int collectBtnX, collectBtnY, collectBtnW = 150, collectBtnH = 70;
+/**
+ * ゲームシーンのみの動く背景描画処理。
+ */
+void moveBack(){
+  // 1枚目の描画
+  image(forest1Img, bGX, bGY);
+  // 2枚目を1枚目のすぐ右側に描画
+  image(forest2Img, bGX + width, bGY);
 
-  /** テキスト表示に使用するフォント */
-  PFont myFont;
+  // 左へ移動
+  bGX -= 5;
 
-  /**
-   * アプリケーションの初期設定を行います。
-   * ウィンドウサイズ、フレームレート、アセットのロード、および各オブジェクトのインスタンス化を実行します。
-   */
-  public void setup() {
-    size(1300, 700);
-    background(110, 121, 85);
-    frameRate(60);
-    rectMode(CENTER);
-    imageMode(CENTER);
-    myFont = createFont("MS Gothic", 50, true); 
-    textFont(myFont);
-    
-    loadAssets();
-    initializeEntities();
-    setButtonCoordinates();
+  // 1枚目が完全に画面左端に消えたら（中心座標が -width/2 になったら）
+  // 位置をリセットしてループさせる
+  if (bGX <= -width/2) {
+    bGX = width/2;
+  }
+}
+
+/**
+ * 全シーン共通の背景描画処理。
+ */
+void common(){
+  background(85,107,47);
+}
+
+/**
+ * タイトルおよび操作ボタンを描画するスタート画面シーン。
+ */
+void startScene(){
+  fill(#1f3134);
+  textSize(250);
+  text("もちばしり", width/2, height/2); 
+
+  fill(#95859c); 
+  rect(buttonX, buttonY, buttonW, buttonH, 10); 
+  fill(#e7e7eb); 
+  textSize(32);
+  text("スタート",buttonX, buttonY);
+
+  fill(#705b67);
+  rect(ruleBtnX, ruleBtnY, ruleBtnW, ruleBtnH, 10);
+  fill(#e7e7eb);
+  textSize(24);
+  text("説明", ruleBtnX, ruleBtnY);
+
+  fill(#705b67);
+  rect(collectBtnX, collectBtnY, collectBtnW, collectBtnH, 10);
+  fill(#e7e7eb);
+  textSize(24);
+  text("コレクション", collectBtnX, collectBtnY);
+}
+
+/**
+ * 操作方法やゲーム内容を説明するルール画面シーン。
+ */
+void ruleScene(){
+  fill(0);
+  textSize(40);
+  text("説明", width/2, 150);
+
+  textSize(30);
+  text("自分だけの鏡餅を作ろう！\n矢印キー↑↓で三方を操作して，流れてくる食べ物をキャッチしよう！\nスコアは積んだ食べ物の文字数の合計だよ\nいっぱい積んで自分だけのかがみもちを作ろう！", width/2, height/2-50);
+
+  image(kabiMikanImg,width/4,height/1.6);
+  textSize(20);
+  text("カビみかんをとると，一番上の食べ物がなくなるよ\n4個目を取るとゲームオーバーになっちゃうから気を付けてね",width/4,height/1.4);
+  text("カビみかんをとると，一番上の食べ物がなくなるよ\n3個目を取るとゲームオーバーになっちゃうから気を付けてね",width/4,height/1.4);
+
+  fill(100);
+  rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
+  fill(255);
+  textSize(24);
+  text("戻る", backBtnX, backBtnY);
+}
+
+/**
+ * コレクション画面シーン。
+ */
+void collectScene(){
+  fill(0);
+  textSize(40);
+  text("コレクション", width/2, 150);
+  textSize(30);
+  text("いい感じに3つだけ積むとコレクションができるかも．．．", width/2, height/2-150);
+
+  text("かがみもち",width/6,550);
+  text("パティシエ",(width/6)*2,550);
+  text("ハンバーガー\nジャンキー",(width/6)*3,550);
+  text("BLT",(width/6)*4,550);
+  text("健康志向",(width/6)*5,550);
+
+  if(kagamimochi){
+    image(kagamimochiImg,width/6,400);
+  }
+  if(patissier){
+    image(patissierImg,(width/6)*2,400);
+  }
+  if(mania){
+    image(maniaImg,(width/6)*3,400);
+  }
+  if(BLT){
+    image(BLTImg,(width/6)*4,400);
+  }
+  if(health){
+    image(healthImg,(width/6)*5,400);
   }
 
-  /**
-   * 画像および音声ファイルをロードし、必要に応じてリサイズを行います。
-   */
-  private void loadAssets() {
-    sanpoImg = loadImage("sanpo.png"); sanpoImg.resize(140, 105);
-    mikanImg = loadImage("mikan.png"); mikanImg.resize(45, 40);
-    mochiImg = loadImage("mochi.png"); mochiImg.resize(75, 40);
-    kabiMikanImg = loadImage("kabiMikan.png"); kabiMikanImg.resize(45, 40);
-    baconImg = loadImage("bacon.png"); baconImg.resize(75, 20);
-    eggImg = loadImage("egg.png"); eggImg.resize(75, 30);
-    hamburgerImg = loadImage("hamburger.png"); hamburgerImg.resize(75, 40);
-    lettuceImg = loadImage("lettuce.png"); lettuceImg.resize(75, 40);
-    tomatoImg = loadImage("tomato.png"); tomatoImg.resize(75, 40);
-    omuImg = loadImage("omu.png"); omuImg.resize(75, 40);
-    macaronImg = loadImage("macaron.png"); macaronImg.resize(45, 40);
-    
-    kagamimochiImg = loadImage("kagamimochi.png");
-    patissierImg = loadImage("patissier.png");
-    maniaImg = loadImage("mania.png");
-    BLTImg = loadImage("BLT.png");
-    healthImg = loadImage("health.png");
-    
-    forest1Img = loadImage("forest.jpg"); forest1Img.resize(1300, 700);
-    forest2Img = loadImage("forest.jpg"); forest2Img.resize(1300, 700);
-    
-    button = new SoundFile(this, "button.mp3");
-    get = new SoundFile(this, "get.mp3");
-    damage = new SoundFile(this, "damage.mp3");
-    gameOver = new SoundFile(this, "gameOver.mp3");
+  fill(100);
+  rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
+  fill(255);
+  textSize(24);
+  text("戻る", backBtnX, backBtnY);
+
+}
+
+/**
+ * メインのアクションシーン。各オブジェクトの更新と判定、タイマー表示を行う。
+ */
+void gameScene(){
+  stroke(#dcd3b2);
+  line(0,100,1300,100);
+  line(0,250,1000,250);
+  line(0,400,1000,400);
+  line(0,550,1000,550);
+  line(1000,0,1000,700);
+
+  sanpo.update(sanpo.px,sanpo.py);
+  someLine1.update();
+  someLine2.update();
+  someLine3.update();
+  someLine4.update();
+  hit1=obLine1.update();
+  hit2=obLine2.update();
+  hit3=obLine3.update();
+  hit4=obLine4.update();
+
+  judge(hit1,hit2,hit3,hit4);
+
+  String timerString=timer();
+  textSize(35);
+  text(timerString,1150,50);
+
+  kabiLife(kabiCount);
+
+  if(kabiCount==0){
+    startTime=millis();
+    scene="gameOver";
+    gameOver.play();
   }
 
-  /**
-   * メイン描画ループ。現在のシーン識別子（{@link #scene}）に基づき、対応するシーン描画関数を呼び出します。
-   */
-  public void draw() {
-    common();
-    if (scene.equals("game")) {
-      tint(255, 100);
-      moveBack();
-      noTint();
-      gameScene();
-    } else if (scene.equals("start")) {
-      startScene();
-    } else if (scene.equals("gameOver")) {
-      gameOverScene();
-    } else if (scene.equals("result")) {
-      resultScene(sanpo);
-    } else if (scene.equals("rule")) {
-      ruleScene();
-    } else if (scene.equals("collection")) {
-      collectScene();
+  if(timeUp){
+    scene="result";
+  }
+}
+
+/**
+ * ゲームオーバーを表示するシーン。
+ */
+void gameOverScene(){
+  background(85,107,47);
+  sanpo.update(75,600);
+
+  fill(255, 0, 0);
+  textSize(80);
+  text("Game Over...", width/2, height/2);
+
+  // 2秒（2000ミリ秒）経過したらリザルトへ
+  if(millis() - startTime > 2000){
+    scene = "result";
+  }
+}
+
+/**
+ * ゲーム終了時の結果を表示するシーン。
+ * スコア計算、アイテム名合成、および獲得した鏡餅の表示を行う。
+ * @param sanpo プレイヤーの所持アイテムを参照するためのプレイヤーインスタンス
+ */
+void resultScene(player sanpo){
+  fill(0);
+  textSize(50);
+  text("完走!!!!!!!!!!", width/2, height/2 - 250);
+  fill(100);
+  rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
+  fill(255);
+  textSize(24);
+  text("戻る", backBtnX, backBtnY);
+  /*textSize(30); 
+  fill(50);
+  text("[押すとはじめにもどる]", width/2, height/2 + 200);*/
+
+  sanpo.update(75,640);
+
+  String NameStart="そなたのかがみもちは...";
+  text(NameStart,width/2-200, height/2 - 150);
+  String fullName="";
+  int fullScore=0;
+
+  // 特殊な組み合わせ判定
+  if(count==3&&sanpo.catchThings.get(0)==2&&sanpo.catchThings.get(1)==2&&sanpo.catchThings.get(2)==1){
+    fullName="かがみもち";
+    fullScore=100000000;
+    kagamimochi=true;
+  }
+  else if(count==3&&sanpo.catchThings.get(0)==10&&sanpo.catchThings.get(1)==10&&sanpo.catchThings.get(2)==10){
+    fullName="パティシエ";
+    fullScore=100000;
+    patissier=true;
+  }
+  else if(count==3&&sanpo.catchThings.get(0)==6&&sanpo.catchThings.get(1)==6&&sanpo.catchThings.get(2)==6){
+    fullName="ハンバーガージャンキー";
+    fullScore=100000;
+    mania=true;
+  }
+  else if(count==3&&sanpo.catchThings.get(0)==4&&sanpo.catchThings.get(1)==7&&sanpo.catchThings.get(2)==8){
+    fullName="BLT";
+    fullScore=100000;
+    BLT=true;
+  }
+  else if(count==3&&sanpo.catchThings.get(0)==7&&sanpo.catchThings.get(1)==7&&sanpo.catchThings.get(2)==7){
+    fullName="健康志向";
+    fullScore=100000;
+    health=true;
+  }
+  else{
+    fullName+="かがみ";
+    for(int i=0;i<count;i++){
+      int id=sanpo.catchThings.get(i);
+      String itemName="";
+      int score=0;
+      switch(id){
+        case 1:  itemName = "みかん"; score=3; break;
+        case 2:  itemName = "もち"; score=2; break;
+        case 4:  itemName = "ベーコン"; score=4; break;
+        case 5:  itemName = "たまご"; score=3; break;
+        case 6:  itemName = "バーガー"; score=4; break;
+        case 7:  itemName = "レタス"; score=3; break;
+        case 8:  itemName = "とまと"; score=3; break;
+        case 9:  itemName = "オムレツ"; score=4; break;
+        case 10: itemName = "マカロン"; score=4; break;
+        default: break;
+       }
+      fullName+=" "+itemName;
+      if((i+1)!=0&&(i+1)%5==0){
+        fullName+="\n";
+      }
+      fullScore+=score;
     }
+    fullName+=" もち";
   }
+  textSize(35);
+  fill(#e2041b);
+  text(fullName, width/2, height/2, 1100, 250);
+  text("得点："+fullScore+"点",width/2,height/2+100);
+}
 
-  /**
-   * 背景を規定の色で塗りつぶし、画面をリセットします。
-   */
-  void common() {
-    background(85, 107, 47);
-  }
+/**
+ * ゲームの再開準備として演出フラグや各レーンのアイテム位置・種類を初期化する。
+ */
+void reset() {
+  kabiCount=3;
+  someLine1.sx = 0;
+  someLine1.sc = 2;
+  someLine2.sx = 0;
+  someLine2.sc = 2;
+  someLine3.sx = 0;
+  someLine3.sc = 2;
+  someLine4.sx = 0;
+  someLine4.sc = 2;
+  bGX=width/2;
+}
 
-  /**
-   * 2枚の背景画像をループさせ、奥に流れる森の視覚効果を演出します。
-   */
-  void moveBack() {
-    image(forest1Img, bGX, bGY);
-    image(forest2Img, bGX + width, bGY);
-    bGX -= 5;
-    if (bGX <= -width / 2) bGX = width / 2;
-  }
-
-  /**
-   * スタート（タイトル）画面のUIを描画します。
-   */
-  void startScene() {
-    fill(31, 49, 52);
-    textSize(250);
-    text("もちばしり", width / 2, height / 2); 
-
-    drawButton(buttonX, buttonY, buttonW, buttonH, "スタート", color(149, 133, 156));
-    drawButton(ruleBtnX, ruleBtnY, ruleBtnW, ruleBtnH, "説明", color(112, 91, 103));
-    drawButton(collectBtnX, collectBtnY, collectBtnW, collectBtnH, "コレクション", color(112, 91, 103));
-  }
-
-  /**
-   * ゲームオーバー画面を表示します。2秒経過後、自動的にリザルト画面へ遷移します。
-   */
-  void gameOverScene() {
-    background(85, 107, 47);
-    sanpo.update(75, 600);
-    fill(255, 0, 0);
-    textSize(80);
-    text("Game Over...", width / 2, height / 2);
-    if (millis() - startTime > 2000) scene = "result";
-  }
-
-  /**
-   * ゲーム本編のメインロジック。アイテムの更新、衝突判定、ライフおよび時間の監視を行います。
-   */
-  void gameScene() {
-    stroke(220, 211, 178);
-    for (int i = 100; i <= 550; i += 150) line(0, i, 1000, i);
-    line(1000, 0, 1000, 700);
-
-    sanpo.update(sanpo.px, sanpo.py);
-    updateItems();
-    hit = checkCollisions();
-    judge(hit1, hit2, hit3, hit4);
-
-    String timerString = timer();
-    textSize(35);
-    text(timerString, 1150, 50);
-    kabiLife(kabiCount);
-
-    if (kabiCount == 0) {
+/**
+ * 画面上のボタンに対するクリック判定およびシーン遷移、ゲーム開始リセットを行う。
+ */
+void mousePressed(){
+  if(scene == "start"){
+    if (abs(mouseX-buttonX)<=50&&abs(mouseY-buttonY)<=50) {
+      scene = "game"; 
+      count = 0;
+      sanpo.catchThings.clear();
+      reset();
       startTime = millis();
-      scene = "gameOver";
-      gameOver.play();
+      button.play();
     }
-    if (timeUp) scene = "result";
-  }
-
-  /**
-   * 各レーンのアイテム更新処理を一括で行います。
-   */
-  void updateItems() {
-    someLine1.update(); someLine2.update(); someLine3.update(); someLine4.update();
-  }
-
-  /**
-   * 各レーンの衝突判定を更新し、結果を返します。
-   * @return いずれかのレーンで衝突が発生した場合は true
-   */
-  boolean checkCollisions() {
-    hit1 = obLine1.update(); hit2 = obLine2.update(); hit3 = obLine3.update(); hit4 = obLine4.update();
-    return (hit1 || hit2 || hit3 || hit4);
-  }
-
-  /**
-   * ゲーム終了後の結果（スコア、アイテム名、獲得称号）を計算して表示します。
-   * ボタン入力によりスタート画面へ戻ります。
-   * @param sanpo プレイヤーが保持するアイテムリストを参照するためのインスタンス
-   */
-  void resultScene(player sanpo) {
-    fill(0);
-    textSize(50);
-    text("完走!!!!!!!!!!", width / 2, height / 2 - 250);
-    drawButton(backBtnX, backBtnY, backBtnW, backBtnH, "戻る", 100);
-    
-    sanpo.update(75, 640);
-    text("そなたのかがみもちは...", width / 2 - 200, height / 2 - 150);
-    
-    calculateAndDisplayResult();
-  }
-
-  /**
-   * 特殊な組み合わせ判定および、アイテム名の連結とスコア計算を実行・表示します。
-   */
-  void calculateAndDisplayResult() {
-    String fullName = "";
-    int fullScore = 0;
-    
-    // 特殊判定ロジック...（提供コードの内容を保持）
-    // ...
-    
-    textSize(35);
-    fill(226, 4, 27);
-    text(fullName, width / 2, height / 2, 1100, 250);
-    text("得点：" + fullScore + "点", width / 2, height / 2 + 100);
-  }
-
-  /**
-   * ゲームを初期状態にリセットします。
-   */
-  void reset() {
-    kabiCount = 3;
-    someLine1.sx = someLine2.sx = someLine3.sx = someLine4.sx = 0;
-    someLine1.sc = someLine2.sc = someLine3.sc = someLine4.sc = 2;
-    bGX = width / 2;
-  }
-
-  /**
-   * マウスのクリック入力を検知し、ボタンの当たり判定に基づいてシーン遷移を実行します。
-   */
-  public void mousePressed() {
-    // 判定ロジック...
-    // ボタン押下時に button.play() を呼び出します
-  }
-
-  /**
-   * キーボードの矢印キー入力を検知し、プレイヤーの上下移動を制御します。
-   */
-  public void keyPressed() {
-    if (keyCode == UP) sanpo.up();
-    else if (keyCode == DOWN) sanpo.down();
-  }
-
-  /**
-   * 残り時間を計算し、分：秒のフォーマットで文字列を生成します。
-   * @return 現在の残り時間文字列
-   */
-  String timer() {
-    int elapsedTime = millis() - startTime;
-    timeUp = (elapsedTime >= gameFinish);
-    int totalSeconds = ceil((gameFinish - elapsedTime) / 1000.0f);
-    if (totalSeconds < 0) totalSeconds = 0;
-    return (totalSeconds / 60) + ":" + nf(totalSeconds % 60, 2);
-  }
-
-  /**
-   * カビみかんの残機（ライフ）を視覚的に表示します。
-   * @param kabiCount 現在の残機数
-   */
-  void kabiLife(int kabiCount) {
-    float kabiWidth = kabiMikanImg.width / 2 + 5;
-    for (int i = 0; i < kabiCount; i++) {
-      image(kabiMikanImg, kabiWidth, 50);
-      kabiWidth += kabiMikanImg.width + 5;
+    if (abs(mouseX-ruleBtnX)<=80&&abs(mouseY-ruleBtnY)<=50) {
+      scene = "rule"; 
+      button.play();
+    }
+    if (abs(mouseX-collectBtnX)<=80&&abs(mouseY-collectBtnY)<=50) {
+      scene = "collection"; 
+      button.play();
     }
   }
+  else if(scene=="rule"){
+    if(abs(mouseX-backBtnX)<=80&&abs(mouseY-backBtnY)<=50){
+      scene="start";
+      button.play();
+    }
+  }
+  else if(scene=="collection"){
+    if(abs(mouseX-backBtnX)<=80&&abs(mouseY-backBtnY)<=50){
+      scene="start";
+      button.play();
+    }
+  }
+  else if(scene == "game"){
+  }
+  else if(scene == "result"){
+    if(abs(mouseX-backBtnX)<=80&&abs(mouseY-backBtnY)<=50){
+      scene="start";
+      button.play();
+    }
+  }
+}
+
+/**
+ * キーボード入力を受け取り、プレイヤーの上移動・下移動命令を発行する。
+ */
+void keyPressed(){
+  if(keyCode==UP){
+    sanpo.up();
+  }
+  else if(keyCode==DOWN){
+    sanpo.down();
+  }
+}
+
+
+/**
+ * 経過時間を管理し、残り時間文字列を生成。終了1.2秒前の演出トリガー判定も行う。
+ * @return "分:秒"形式の残り時間文字列
+ */
+String timer(){
+  int elapsedTime = millis() - startTime; 
+  timeUp = (elapsedTime >= gameFinish);
+  int totalSeconds = ceil((gameFinish - elapsedTime) / 1000.0);
+  if (totalSeconds < 0){
+    totalSeconds = 0;
+  }
+  int m = totalSeconds / 60; 
+  int s=totalSeconds % 60; 
+
+  String timeString = m + ":" + nf(s, 2);
+  return timeString;
+}
+
+/**
+ * カビみかん獲得個数による残りライフの表示を行う．
+ */
+void kabiLife(int kabiCount){
+  float kabiWidth=kabiMikanImg.width/2+5,kabiHeight=50;
+  for(int i=0;i<kabiCount;i++){
+    image(kabiMikanImg,kabiWidth,kabiHeight);
+    kabiWidth+=kabiMikanImg.width+5;
+  }
+}
+
+/**
+ * 各レーンでの衝突判定結果を統合し、衝突があった場合にプレイヤーの所持品リストを更新する。
+ * @param hit1〜hit4 各レーンごとの衝突有無
+ */
+void judge(boolean hit1,boolean hit2,boolean hit3,boolean hit4){
+  something currentThing=null;
+  if(hit1||hit2||hit3||hit4){
+    hit=true;
+    if(hit1){ currentThing=someLine1; }
+    else if(hit2){ currentThing=someLine2; }
+    else if(hit3){ currentThing=someLine3; }
+    else if(hit4){ currentThing=someLine4; }
+
+    sanpo.thingsRegulate(currentThing.sc); 
+    currentThing.sc=0;
+  }
+  else{
+    hit=false;
+  }
+}
+
+/**
+ * プレイヤー（三方）および積み上げられたアイテムの状態管理と描画を担当するクラス。
+ */
+class player{
+  float px;
+  float py;
+  /** 所持しているアイテムIDを格納する動的配列 */
+  ArrayList<Integer> catchThings; 
+
+  player(){
+    px=1150;
+    py=475;
+    catchThings=new ArrayList<Integer>();
+  }
 
   /**
-   * プレイヤー（三方）の状態管理およびアイテムの積み上げ描画を行う内部クラス。
+   * 三方の土台と、積み上げられたアイテムを現在のリスト順に描画する。
+   * @param nowX 描画位置のX座標
+   * @param nowY 描画位置のY座標（土台の基準点）
    */
-  class player {
-    float px, py;
-    /** 獲得したアイテムのIDを格納するリスト */
-    ArrayList<Integer> catchThings;
-
-    player() {
-      px = 1150; py = 475;
-      catchThings = new ArrayList<Integer>();
-    }
-
-    /**
-     * プレイヤーと所持している積み上げアイテムを現在の位置に描画します。
-     * @param nowX 描画する基準X座標
-     * @param nowY 描画する基準Y座標
-     */
-    void update(float nowX, float nowY) {
-      image(sanpoImg, nowX, nowY + 25);
-      // 積み上げ描画ロジック...
-    }
-
-    /** プレイヤーを上のレーンへ移動させます。上端に達した場合は下端へループします。 */
-    void up() { py = (py == 175) ? 625 : py - 150; }
-    /** プレイヤーを下のレーンへ移動させます。下端に達した場合は上端へループします。 */
-    void down() { py = (py == 625) ? 175 : py + 150; }
-
-    /**
-     * アイテム取得時のリスト操作、効果音再生、ライフ減少処理を行います。
-     * @param choice 取得したアイテムのID
-     */
-    void thingsRegulate(int choice) {
-      if (choice == 3) {
-        kabiCount--; damage.play();
-        if (count != 0) { catchThings.remove(count - 1); count--; }
-      } else {
-        if (count >= countLmt) { catchThings.remove(count - 1); count--; }
-        catchThings.add(count, choice);
-        count++; get.play();
+  void update(float nowX,float nowY){
+    image(sanpoImg,nowX,nowY+25);
+    float nowHeight=nowY+25-(sanpoImg.height/2)+10; 
+    for(int i=0;i<count;i++){
+      int nowThing=catchThings.get(i);
+      int beforeThing;
+      if(i!=0){
+        beforeThing=catchThings.get(i-1);
+      }
+      else{
+        beforeThing=1;
+      }
+      switch(nowThing){
+        case 1:
+              nowHeight=nowHeight-(mikanImg.height/2);
+              image(mikanImg,nowX,nowHeight);
+              nowHeight=nowHeight-(mikanImg.height/2);
+              break;
+        case 2:
+              nowHeight=nowHeight-(mochiImg.height/2);
+              if(beforeThing==2){
+                nowHeight=nowHeight+15;
+              }
+              image(mochiImg,nowX,nowHeight);
+              nowHeight=nowHeight-(mochiImg.height/2);
+              break;
+        case 4:
+              nowHeight=nowHeight-(baconImg.height/2);
+              image(baconImg,nowX,nowHeight);
+              nowHeight=nowHeight-(baconImg.height/2);
+              break;
+        case 5:
+              nowHeight=nowHeight-(eggImg.height/2);
+              image(eggImg,nowX,nowHeight);
+              nowHeight=nowHeight-(eggImg.height/2);
+              break;
+        case 6:
+              nowHeight=nowHeight-(hamburgerImg.height/2)+10;
+              image(hamburgerImg,nowX,nowHeight);
+              nowHeight=nowHeight-(hamburgerImg.height/2);
+              break;
+        case 7:
+              nowHeight=nowHeight-(lettuceImg.height/2);
+              image(lettuceImg,nowX,nowHeight);
+              nowHeight=nowHeight-(lettuceImg.height/2);
+              break;
+        case 8:
+              nowHeight=nowHeight-(tomatoImg.height/2);
+              image(tomatoImg,nowX,nowHeight);
+              nowHeight=nowHeight-(tomatoImg.height/2);
+              break;
+        case 9:
+              nowHeight=nowHeight-(omuImg.height/2)+10;
+              image(omuImg,nowX,nowHeight);
+              nowHeight=nowHeight-(omuImg.height/2);
+              break;
+        case 10:
+              nowHeight=nowHeight-(macaronImg.height/2);
+              image(macaronImg,nowX,nowHeight);
+              nowHeight=nowHeight-(macaronImg.height/2);
+              break;
+        default:
+                break;
       }
     }
   }
 
-  /**
-   * レーン上を右から左へ（視覚的には左から右へ）流れるアイテム。
-   */
-  class something {
-    float sx, sy, sv;
-    /** アイテムの種類を決定するID */
-    int sc;
+  /** プレイヤーを一つ上のレーンへ移動。一番上の場合は一番下へループする。 */
+  void up(){
+    if(py==175){ py=625; }
+    else{ py-=150; }
+  }
 
-    something(float iny) {
-      sx = 100; sy = iny; sv = (int)random(5, 10); sc = 2;
-    }
-
-    /** アイテムの位置を更新し、現在地に応じた適切な画像を描画します。画面端に達すると再生成されます。 */
-    void update() {
-      sx += sv;
-      // 描画ロジック...
-      if (sx >= 1000) { sx = 0; sv = (int)random(5, 10); sc = (int)random(17); }
-    }
+  /** プレイヤーを一つ下のレーンへ移動。一番下の場合は一番上へループする。 */
+  void down(){
+    if(py==625){ py=175; }
+    else{ py+=150; }
   }
 
   /**
-   * プレイヤーとアイテムの幾何学的な距離を測定し、キャッチ判定を行います。
+   * 取得したアイテムをリストに追加、またはカビみかん（ID:3）による削除を行う。
+   * 最大個数(countLmt)を超えた場合は古いものを削除して追加する。
+   * @param choice 取得したアイテムのID
    */
-  class observer {
-    player sanpo; something some;
-    observer(player _s, something _m) { sanpo = _s; some = _m; }
+  void thingsRegulate(int choice){
+    switch(choice){
+      case 1:
+            if(count>=countLmt){
+              catchThings.remove(count-1);
+              count--;
+            }
+            catchThings.add(count,choice);
+            count++;
+            get.play();
+            break;
+      case 3:
+            kabiCount--;
+            if(count!=0){
+              catchThings.remove(count-1);
+              count--;
+            }
+            damage.play();
+            break;
+      default:
+            if(count>=countLmt){
+              catchThings.remove(count-1);
+              count--;
+            }
+            catchThings.add(count,choice);
+            count++;
+            get.play();
+            break;
+    }
+  }
+}
 
-    /**
-     * 現在のプレイヤーとアイテムの位置関係から衝突の有無を判定します。
-     * @return 衝突（キャッチ成功）している場合 true
-     */
-    boolean update() {
-      return (sanpo.py == some.sy && some.sc != 0 && dist(sanpo.px, sanpo.py, some.sx, some.sy) <= 250);
+/**
+ * レーン上に流れるアイテム（または障害物）を管理するクラス。
+ */
+class something{
+  float sx;
+  float sy;
+  float sv;
+  /** 表示するアイテムの種類を決定するID */
+  int sc; 
+
+  something(float iny){
+    sx=100;
+    sy=iny;
+    sv=int(random(5,10));
+    sc=2;
+  }
+
+  /**
+   * アイテムの移動を更新し、対応する画像を描画する。画面端到達で再抽選を行う。
+   */
+  void update(){
+    sx+=sv;
+    if(sc==0){
+      noFill();
+      noStroke();
+      ellipse(sx,sy,1,1);
+    }
+    else if(sc==1||sc==13||sc==14){
+      sc=1;
+      image(mikanImg,sx,sy);
+    }
+    else if(sc==2||sc==11||sc==12){
+      sc=2;
+      image(mochiImg,sx,sy);
+    }
+    else if(sc==3||sc==15||sc==16){
+      sc=3;
+      image(kabiMikanImg,sx,sy);
+    }
+    else if(sc==4){
+      image(baconImg,sx,sy);
+    }
+    else if(sc==5){
+      image(eggImg,sx,sy);
+    }
+    else if(sc==6){
+      image(hamburgerImg,sx,sy);
+    }
+    else if(sc==7){
+      image(lettuceImg,sx,sy);
+    }
+    else if(sc==8){
+      image(tomatoImg,sx,sy);
+    }
+    else if(sc==9){
+      image(omuImg,sx,sy);
+    }
+    else if(sc==10){
+      image(macaronImg,sx,sy);
+    }
+    if(sx>=1000){
+      sx=0;
+      sv=int(random(5,10));
+      sc=int(random(17));
+    }
+  }
+}
+
+/**
+ * プレイヤーとレーン上のアイテムとの衝突（位置関係の重複）を判定するクラス。
+ */
+class observer{
+  player sanpo;
+  something some;
+
+  observer(player _sanpo,something _some){
+    sanpo=_sanpo;
+    some=_some;
+  }
+
+  /**
+   * 現在のプレイヤー座標とアイテム座標、および衝突半径を計算して衝突の成否を返す。
+   * @return 衝突していれば true、していなければ false
+   */
+  boolean update(){
+    if(sanpo.py==some.sy&&some.sc!=0&&dist(sanpo.px,sanpo.py,some.sx,some.sy)<=250){
+      return true;
+    }
+    else{
+      return false;
     }
   }
 }
