@@ -24,7 +24,7 @@ int kabiCount=3;
 static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg,kagamimochiImg,patissierImg,maniaImg,BLTImg,healthImg,forest1Img,forest2Img;
 
 /** 効果音 */
-SoundFile button,get,damage;
+SoundFile button,get,damage,gameOver;
 
 /** 現在の表示シーン（"start", "game", "result", "rule"） */
 String scene="start";
@@ -103,6 +103,7 @@ void setup(){
   button = new SoundFile(this, "button.mp3");
   get = new SoundFile(this, "get.mp3");
   damage = new SoundFile(this, "damage.mp3");
+  gameOver= new SoundFile(this,"gameOver.mp3");
   
   // クラスのインスタンス初期化
   sanpo=new player();
@@ -222,7 +223,7 @@ void ruleScene(){
   
   image(kabiMikanImg,width/4,height/1.6);
   textSize(20);
-  text("カビみかんをとると，一番上の食べ物がなくなるよ\n4個目を取るとゲームオーバーになっちゃうから気を付けてね",width/4,height/1.4);
+  text("カビみかんをとると，一番上の食べ物がなくなるよ\n3個目を取るとゲームオーバーになっちゃうから気を付けてね",width/4,height/1.4);
   
   fill(100);
   rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
@@ -303,6 +304,7 @@ void gameScene(){
   if(kabiCount==0){
     startTime=millis();
     scene="gameOver";
+    gameOver.play();
   }
   
   if(timeUp){
