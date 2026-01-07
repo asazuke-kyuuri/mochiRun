@@ -336,9 +336,14 @@ void resultScene(player sanpo){
   fill(0);
   textSize(50);
   text("完走!!!!!!!!!!", width/2, height/2 - 250);
-  textSize(30); 
+  fill(100);
+  rect(backBtnX, backBtnY, backBtnW, backBtnH, 10);
+  fill(255);
+  textSize(24);
+  text("戻る", backBtnX, backBtnY);
+  /*textSize(30); 
   fill(50);
-  text("[押すとはじめにもどる]", width/2, height/2 + 200);
+  text("[押すとはじめにもどる]", width/2, height/2 + 200);*/
   
   sanpo.update(75,640);
   
@@ -458,8 +463,10 @@ void mousePressed(){
   else if(scene == "game"){
   }
   else if(scene == "result"){
-    scene = "start";
-    button.play();
+    if(abs(mouseX-backBtnX)<=80&&abs(mouseY-backBtnY)<=50){
+      scene="start";
+      button.play();
+    }
   }
 }
 
