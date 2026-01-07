@@ -21,7 +21,7 @@ int countLmt=20;
 int kabiCount=3;
 
 /** 各種画像リソースを保持する静的変数 */
-static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg,kagamimochiImg,patissierImg,maniaImg,BLTImg,healthImg;
+static PImage sanpoImg,mikanImg,mochiImg,kabiMikanImg,baconImg,eggImg,hamburgerImg,lettuceImg,tomatoImg,omuImg,macaronImg,kagamimochiImg,patissierImg,maniaImg,BLTImg,healthImg,forest1Img,forest2Img;
 
 /** 効果音 */
 SoundFile button,get,damage;
@@ -33,9 +33,11 @@ boolean kagamimochi=false,patissier=false,mania=false,BLT=false,health=false;
 /** ゲーム開始時のシステム時刻（ミリ秒） */
 int startTime;
 /** ゲームの制限時間設定（10000ミリ秒 = 10秒） */
-final int gameFinish=20000;
+final int gameFinish=30000;
 /** タイムアップ（終了判定）の状態を保持するフラグ */
 boolean timeUp;
+/** 現在の動く背景画像位置 */
+float bGX=width/2,bGY=350;
 
 /** スタートボタンの座標とサイズ設定 */
 int buttonX,buttonY,buttonW = 200,buttonH = 70; 
@@ -92,7 +94,10 @@ void setup(){
   maniaImg=loadImage("mania.png");
   BLTImg=loadImage("BLT.png");
   healthImg=loadImage("health.png");
-  
+  forest1Img=loadImage("forest.jpg");
+  forest1Img.resize(1300,700);
+  forest2Img=loadImage("forest.jpg");
+  forest2Img.resize(1300,700);
   
   // 音声データのロード
   button = new SoundFile(this, "button.mp3");
@@ -126,6 +131,11 @@ void setup(){
  */
 void draw(){
   common();
+  if(scene=="game"){
+    tint(255,100);
+    moveBack();
+  }
+  noTint();
   if(scene=="start"){
     startScene();
   }
@@ -143,6 +153,25 @@ void draw(){
   }
   else if(scene=="collection"){
     collectScene();
+  }
+}
+
+/**
+ * ゲームシーンのみの動く背景描画処理。
+ */
+void moveBack(){
+  // 1枚目の描画
+  image(forest1Img, bGX, bGY);
+  // 2枚目を1枚目のすぐ右側に描画
+  image(forest2Img, bGX + width, bGY);
+  
+  // 左へ移動
+  bGX -= 5;
+  
+  // 1枚目が完全に画面左端に消えたら（中心座標が -width/2 になったら）
+  // 位置をリセットしてループさせる
+  if (bGX <= -width/2) {
+    bGX = width/2;
   }
 }
 
@@ -389,6 +418,7 @@ void reset() {
   someLine3.sc = 2;
   someLine4.sx = 0;
   someLine4.sc = 2;
+  bGX=width/2;
 }
 
 /**
