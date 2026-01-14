@@ -33,7 +33,7 @@ boolean kagamimochi=false,patissier=false,mania=false,BLT=false,health=false;
 /** ゲーム開始時のシステム時刻（ミリ秒） */
 int startTime;
 /** ゲームの制限時間設定（10000ミリ秒 = 10秒） */
-final int gameFinish=30000;
+final int gameFinish=25000;
 /** タイムアップ（終了判定）の状態を保持するフラグ */
 boolean timeUp;
 /** 現在の動く背景画像位置 */
@@ -223,7 +223,6 @@ void ruleScene(){
 
   image(kabiMikanImg,width/4,height/1.6);
   textSize(20);
-  text("カビみかんをとると，一番上の食べ物がなくなるよ\n4個目を取るとゲームオーバーになっちゃうから気を付けてね",width/4,height/1.4);
   text("カビみかんをとると，一番上の食べ物がなくなるよ\n3個目を取るとゲームオーバーになっちゃうから気を付けてね",width/4,height/1.4);
 
   fill(100);
